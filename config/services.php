@@ -34,5 +34,13 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'hospital_api' => [
+    'url' => env('HOSPITAL_API_URL'),
+    'token' => env('HOSPITAL_API_TOKEN'),
+     'timeout' => env('HOSPITAL_API_TIMEOUT', 60),
+    'mensajeria' => [
+        'url' => env('MENSAJERIA_API_URL'),
+    ],
+],
 
 ];
