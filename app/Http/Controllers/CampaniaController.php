@@ -583,19 +583,25 @@ public function guardarBorrador(Request $request)
         $campania->ultima_atencion_desde = $request->ultima_atencion_desde ?: null;
         $campania->ultima_atencion_hasta = $request->ultima_atencion_hasta ?: null;
 
-        $debeResolverSegmentacion = !$campania->exists
-            || !$campania->cantidad_destinatarios
-            || $request->boolean('segmentacion_modificada');
-
-        if ($debeResolverSegmentacion) {
+       if ($request->segmentacion_tipo === 'filtros') {
             $segmentacion = $this->resolverSegmentacion($request);
 
             $campania->segmentacion_sql = $segmentacion['sql'];
             $campania->cantidad_destinatarios = $segmentacion['cantidad'];
         } else {
-            $campania->segmentacion_sql = $request->segmentacion_sql;
-        }
+            $debeResolverSegmentacion = !$campania->exists
+                || !$campania->cantidad_destinatarios
+                || $request->boolean('segmentacion_modificada');
 
+            if ($debeResolverSegmentacion) {
+                $segmentacion = $this->resolverSegmentacion($request);
+
+                $campania->segmentacion_sql = $segmentacion['sql'];
+                $campania->cantidad_destinatarios = $segmentacion['cantidad'];
+            } else {
+                $campania->segmentacion_sql = $request->segmentacion_sql;
+            }
+        }
         $campania->mensaje = $request->mensaje;
 
         if (!$campania->exists || $campania->estado === 'borrador') {
@@ -625,7 +631,7 @@ public function guardarBorrador(Request $request)
         return response()->json([
             'ok' => true,
             'id' => $campania->id,
-            'message' => 'Campaña guardada en borrador',
+            'message' => 'Campaña guardada',
             'cantidad' => $campania->cantidad_destinatarios,
             'sql_generada' => $campania->segmentacion_sql,
         ]);
@@ -634,7 +640,7 @@ public function guardarBorrador(Request $request)
         report($e);
 
         return response()->json([
-            'message' => 'No se pudo guardar el borrador',
+            'message' => 'No se pudo guardar',
             'error_real' => $e->getMessage(),
         ], 500);
     }
@@ -688,9 +694,11 @@ public function cancelar(Campania $campania)
    public function edit(Campania $campania)
 {
     if (!$campania->puedeEditarse()) {
-        return redirect()
-            ->route('campanias.show', $campania->id)
-            ->withErrors(['general' => 'La campaña ya no puede modificarse porque llegó la fecha de programación.']);
+       return redirect()
+        ->route('campanias.index')
+        ->withErrors([
+            'general' => 'La campaña ya no puede modificarse porque llegó la fecha de programación.'
+        ]);
     }
 
     return view('campanias.create', compact('campania'));

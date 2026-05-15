@@ -115,10 +115,9 @@
                 <tr>
                     <th>Campaña</th>
                     <th>Solicitante</th>
-                    <th>Fecha</th>
-                    <th>Segmento</th>
-                    <th>Pacientes</th>
+                    <th>Fecha Creación</th>
                     <th>Estado</th>
+                    <th>Fecha Programación</th>
                     <th>Responsable</th>
                     <th class="text-end">Acciones</th>
                 </tr>
@@ -138,15 +137,7 @@
                         </td>
 
                         <td>
-                            {{ optional($campania->fecha_programada ?? $campania->created_at)->format('d/m/Y H:i') }}
-                        </td>
-
-                        <td>
-                            {{ $campania->segmento_descripcion ?? '-' }}
-                        </td>
-
-                        <td>
-                            {{ number_format($campania->cantidad_pacientes ?? 0, 0, ',', '.') }}
+                            {{ optional($campania->created_at)->format('d/m/Y H:i') }}
                         </td>
 
                         <td>
@@ -159,37 +150,28 @@
                             @elseif($estado === 'programada')
                                 <span class="badge bg-warning text-dark rounded-pill">Programada</span>
                             @elseif($estado === 'borrador')
-                                <span class="badge bg-primary text-dark rounded-pill">Borrador</span>
-                            @elseif($estado === 'cancelada')
-                                <span class="badge bg-primary text-dark rounded-pill">Cancelada</span>
+                                <span class="badge bg-info text-dark rounded-pill">Borrador</span>
+                            
                             @else
                                 <span class="badge bg-secondary rounded-pill">{{ ucfirst($campania->estado) }}</span>
                             @endif
+                        </td>
+                          <td>
+                            {{ optional($campania->fecha_programada)->format('d/m/Y H:i') }}
                         </td>
                         <td>
                           {{ $campania->responsable->name ?? '-' }}
                         </td>
                         <td class="text-end">
-                            @if($estado === 'finalizada')
-                               
-                            
-                            @elseif($estado === 'programada')
-                                <a href="{{ route('campanias.edit', $campania->id) }}" class="btn btn-sm btn-light border">
+                          
+                           @if(in_array($estado, ['programada', 'borrador']) && $campania->puedeEditarse())
+                                <a href="{{ route('campanias.edit', $campania->id) }}"
+                                class="btn btn-sm btn-light border"
+                                title="Editar campaña">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                              
-                            @elseif($estado === 'borrador')
-                                <a href="{{ route('campanias.edit', $campania->id) }}" class="btn btn-sm btn-light border">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                
                             @endif
-                            <button
-                                type="button"
-                                class="btn btn-outline-danger btn-sm"
-                                onclick="cancelarCampania({{ $campania->id }})">
-                                Cancelar
-                            </button>
+                
                              <a href="{{ route('campanias.show', $campania->id) }}" class="btn btn-sm btn-light border">
                                     <i class="bi bi-eye"></i>
                                 </a>
@@ -207,6 +189,54 @@
         </table>
     </div>
 </div>
+@if($errors->has('general'))
+<div class="modal fade" id="modalMensajeCampania" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">No se puede editar</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
+            <div class="modal-body">
+                <p class="mb-0">{{ $errors->first('general') }}</p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = new bootstrap.Modal(document.getElementById('modalMensajeCampania'));
+    modal.show();
+});
+</script>
+@endif
+<div class="modal fade" id="modalMensajeCampania" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" :class="modalTipoClase">
+                <h5 class="modal-title" x-text="modalTitulo"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-0" x-text="modalMensaje"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
            

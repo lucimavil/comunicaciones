@@ -100,7 +100,7 @@ x-model="descripcion"
 
 
 <div class="mb-3">
-    <label class="form-label">Solicitante</label>
+    <label class="form-label">Solicitante*</label>
     <select
         class="form-control"
         x-model="solicitante"
@@ -189,11 +189,12 @@ x-model="descripcion"
                     <div class="col-md-6">
                         <label class="form-label">Edad mínima</label>
                         <input
-                            type="range"
-                            class="form-range"
-                            min="0"
-                            max="100"
-                            x-model="edad_min">
+    type="range"
+    class="form-range"
+    min="14"
+    max="100"
+    x-model="edad_min"
+    @input="marcarSegmentacionModificada()">
                         <p class="small text-muted">
                             <span x-text="edad_min"></span> años
                         </p>
@@ -201,12 +202,13 @@ x-model="descripcion"
 
                     <div class="col-md-6">
                         <label class="form-label">Edad máxima</label>
-                        <input
-                            type="range"
-                            class="form-range"
-                            min="0"
-                            max="100"
-                            x-model="edad_max">
+                       <input
+    type="range"
+    class="form-range"
+    min="14"
+    max="100"
+    x-model="edad_max"
+    @input="marcarSegmentacionModificada()">
                         <p class="small text-muted">
                             <span x-text="edad_max"></span> años
                         </p>
@@ -227,11 +229,14 @@ x-model="descripcion"
         <div class="row">
             <div class="col-md-4">
                 <label class="form-label">Sexo</label>
-                <select class="form-control mb-3" x-model="sexo" name="sexo">
+                <select
+                    class="form-control mb-3"
+                    x-model="sexo"
+                    name="sexo"
+                    @change="marcarSegmentacionModificada()">
                     <option value="">Todos</option>
                     <option value="F">Femenino</option>
                     <option value="M">Masculino</option>
-                    <option value="O">Otro</option>
                 </select>
             </div>
 
@@ -243,10 +248,10 @@ x-model="descripcion"
                     x-model="localidad"
                     name="localidad"
                     placeholder="Ej: San Luis"
-                     @change="segmentacionModificada = true; segmentacionProbada = false">
+                     @change="marcarSegmentacionModificada()">
             </div>
 
-            <div class="col-md-4">Diagnóstico
+            <div class="col-md-4">
                 <label class="form-label">Diagnóstico</label>
                 <input
                     type="text"
@@ -254,28 +259,28 @@ x-model="descripcion"
                     x-model="diagnostico"
                     name="diagnostico"
                     placeholder="Ej: Diabetes"
-                    @change="segmentacionModificada = true; segmentacionProbada = false">
+                   @change="marcarSegmentacionModificada()">
             </div>
 
         </div>
 
         <div class="row">
             <div class="col-md-6">
-                <label class="form-label">Última atención desde</label>
+                <label class="form-label">Última atención desde*</label>
                 <input
                     type="date"
                     class="form-control mb-3"
                     x-model="ultima_atencion_desde"
-                    name="ultima_atencion_desde">
+                    name="ultima_atencion_desde" @change="marcarSegmentacionModificada()">
             </div>
 
             <div class="col-md-6">
-                <label class="form-label">Última atención hasta</label>
+                <label class="form-label">Última atención hasta*</label>
                 <input
                     type="date"
                     class="form-control mb-3"
                     x-model="ultima_atencion_hasta"
-                    name="ultima_atencion_hasta">
+                    name="ultima_atencion_hasta"  @change="marcarSegmentacionModificada()">
             </div>
         </div>
 
@@ -289,7 +294,7 @@ x-model="descripcion"
 
         <textarea
             name="segmentacion_sql"
-             @input="segmentacionModificada = true; segmentacionProbada = false"
+           @change="marcarSegmentacionModificada()"
             class="form-control"
             rows="8"
             x-model="segmentacion_sql"
@@ -340,25 +345,33 @@ La consulta debe traer campos con esos alias">
 <h5 class="mb-3">Mensaje de la campaña</h5>
 
 <textarea
-name="mensaje"
-rows="4"
-class="form-control"
-x-model="mensaje"
-:class="{'is-invalid':errores.mensaje}">
+    name="mensaje"
+    rows="4"
+    class="form-control"
+    x-model="mensaje"
+    minlength="10"
+    maxlength="500"
+    :class="{'is-invalid':errores.mensaje}">
 </textarea>
 
-<div class="invalid-feedback">
-Debe escribir el mensaje
+<div class="text-end small text-muted mt-1">
+    <span x-text="mensaje.length"></span>/500 caracteres
 </div>
 
 <div class="mb-3">
     <label class="form-label">Adjuntar imagen o documento</label>
     <input
-        type="file"
-        class="form-control"
-        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
-        @change="adjuntoFile = $event.target.files[0]"
-    >
+    type="file"
+    class="form-control"
+    accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+    @change="
+        adjuntoFile = $event.target.files[0];
+
+        if (adjuntoFile) {
+            adjuntoPreview = URL.createObjectURL(adjuntoFile);
+        }
+    "
+>
     <small class="text-muted">Permitidos: JPG, PNG, PDF, DOC, DOCX. Máx 10MB.</small>
 </div>
 <div x-show="adjunto_path" class="mt-3">
@@ -399,7 +412,7 @@ Debe escribir el mensaje
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="text-muted small d-block">Solicitante</label>
+                        <label class="text-muted small d-block">Solicitante*</label>
                         <div class="fw-semibold fs-5" x-text="solicitante || '-'"></div>
                     </div>
 
@@ -410,7 +423,32 @@ Debe escribir el mensaje
                 </div>
             </div>
 
-           
+           <div class="panel-card mb-4">
+    <h5 class="fw-bold mb-3">Segmentación aplicada</h5>
+
+    <template x-if="segmentacion_tipo === 'filtros'">
+        <div>
+            <div><strong>Tipo:</strong> Filtros predefinidos</div>
+            <div><strong>Rango de edad:</strong> <span x-text="edad_min"></span> a <span x-text="edad_max"></span> años</div>
+            <div><strong>Sexo:</strong> <span x-text="sexo || 'Todos'"></span></div>
+            <div><strong>Localidad:</strong> <span x-text="localidad || 'Todas'"></span></div>
+            <div><strong>Diagnóstico:</strong> <span x-text="diagnostico || 'Todos'"></span></div>
+            <div><strong>Última atención desde:</strong> <span x-text="ultima_atencion_desde || '-'"></span></div>
+            <div><strong>Última atención hasta:</strong> <span x-text="ultima_atencion_hasta || '-'"></span></div>
+        </div>
+    </template>
+
+    <template x-if="segmentacion_tipo === 'sql'">
+        <div>
+            <div><strong>Tipo:</strong> Consulta SQL avanzada</div>
+
+            <label class="form-label mt-3">Consulta SQL aplicada</label>
+            <pre class="bg-light border rounded p-3 small"
+                 style="white-space: pre-wrap;"
+                 x-text="segmentacion_sql || '-'"></pre>
+        </div>
+    </template>
+</div>
 
             {{-- Alcance y costo --}}
             <div class="panel-card">
@@ -460,11 +498,82 @@ Debe escribir el mensaje
                     </div>
                 
                 </div>
-               @if(isset($campania) && $campania->adjunto_path)
-                    <a href="{{ asset('storage/' . $campania->adjunto_path) }}" target="_blank">
-                        Ver adjunto
-                    </a>
-                @endif
+              <div class="panel-card mb-4">
+    <label class="text-muted small d-block mb-3">
+        Archivo adjunto
+    </label>
+
+    <!-- IMAGEN NUEVA -->
+    <template x-if="adjuntoFile && adjuntoFile.type.startsWith('image/')">
+        <div class="text-center">
+            <img
+                :src="adjuntoPreview"
+                class="img-fluid rounded shadow border"
+                style="max-width: 400px; max-height: 400px; object-fit: contain;">
+        </div>
+    </template>
+
+    <!-- PDF NUEVO -->
+    <template x-if="adjuntoFile && adjuntoFile.type === 'application/pdf'">
+        <div class="text-center w-100 overflow-hidden">
+    <img
+        :src="adjuntoPreview"
+        class="img-fluid rounded shadow border"
+        style="width: 100%; max-width: 320px; max-height: 260px; object-fit: contain;">
+</div>
+    </template>
+
+    <!-- DOC/DOCX NUEVO -->
+    <template x-if="adjuntoFile &&
+        (
+            adjuntoFile.type === 'application/msword' ||
+            adjuntoFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )">
+        <div class="border rounded p-4 bg-light text-center">
+            <div class="fs-1 mb-2">📄</div>
+
+            <div class="fw-semibold" x-text="adjuntoFile.name"></div>
+
+            <div class="small text-muted mt-1">
+                Documento Word adjunto
+            </div>
+        </div>
+    </template>
+
+    <!-- ARCHIVO YA GUARDADO -->
+    <template x-if="!adjuntoFile && adjunto_path">
+
+        <div class="text-center">
+
+            <!-- Imagen -->
+            <template x-if="adjunto_tipo_mime && adjunto_tipo_mime.startsWith('image/')">
+               <div class="text-center w-100 overflow-hidden">
+    <img
+        :src="'/storage/' + adjunto_path"
+        class="img-fluid rounded shadow border"
+        style="width: 100%; max-width: 320px; max-height: 260px; object-fit: contain;">
+</div>
+            </template>
+
+            <!-- PDF -->
+            <template x-if="adjunto_tipo_mime === 'application/pdf'">
+                <iframe
+                    :src="'/storage/' + adjunto_path"
+                    width="100%"
+                    height="500"
+                    class="border rounded">
+                </iframe>
+            </template>
+
+        </div>
+    </template>
+
+    <template x-if="!adjuntoFile && !adjunto_path">
+        <div class="text-muted">
+            Sin archivo adjunto
+        </div>
+    </template>
+</div>
 
                 </div>
             </div>
@@ -495,19 +604,21 @@ Debe escribir el mensaje
 
         
     <button 
-        class="btn btn-info"
-        x-show="step == 2"
-        @click="abrirResultado"
-        :disabled="loadingSegmentacion"
-        @click.prevent="!loadingSegmentacion && abrirResultado()"
-    >
-        <span x-show="!loadingSegmentacion">Probar segmentación</span>
+    type="button"
+    class="btn btn-info"
+    x-show="step == 2"
+    @click.prevent="abrirResultado()"
+    :disabled="loadingSegmentacion"
+>
+    <span x-show="!loadingSegmentacion">
+        Probar segmentación
+    </span>
 
-        <span x-show="loadingSegmentacion">
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            Calculando cantidad de pacientes...
-        </span>
-    </button>
+    <span x-show="loadingSegmentacion">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Calculando pacientes...
+    </span>
+</button>
         <button
             type="button"
             class="btn btn-success me-2 px-4"
@@ -616,7 +727,7 @@ function wizardCampania(campania = null) {
         nombre: campania?.nombre ?? '',
         descripcion: campania?.descripcion ?? '',
         solicitante: campania?.solicitante ?? '',
-        segmentacionProbada: campania?.alcance ?? true,
+        segmentacionProbada: campania?.alcance > 0,
         segmentacionModificada: false,
 
         segmentacion_tipo: 'filtros',
@@ -669,6 +780,12 @@ function wizardCampania(campania = null) {
                 window.location.href = '/campanias';
             }
         },
+        marcarSegmentacionModificada() {
+            this.segmentacionModificada = true;
+            this.segmentacionProbada = false;
+            this.alcance = 0;
+            this.advertencia_segmentacion = '';
+        },
         async siguiente() {
             this.errores = {};
 
@@ -688,10 +805,36 @@ function wizardCampania(campania = null) {
             }
             if (this.step == 2) {
                 if (this.segmentacion_tipo === 'filtros') {
+                    if (this.alcance <= 0) {
+                        this.mostrarModal('Segmentación inválida', 'No se puede continuar sin pacientes alcanzados.', 'warning');
+                        return;
+                    }
+
+                    if (this.advertencia_segmentacion) {
+                        this.mostrarModal('Segmentación inválida', this.advertencia_segmentacion, 'warning');
+                        return;
+                    }
                     if (parseInt(this.edad_min) > parseInt(this.edad_max)) {
                         this.mostrarModal(
                             'Validación',
                             'La edad mínima no puede ser mayor a la edad máxima',
+                            'warning'
+                        );
+                        return;
+                    }
+                    if (this.alcance <= 0) {
+                        this.mostrarModal(
+                            'Segmentación inválida',
+                            'No puede continuar con una segmentación sin pacientes.',
+                            'warning'
+                        );
+                        return;
+                    }
+
+                    if (this.advertencia_segmentacion) {
+                        this.mostrarModal(
+                            'Segmentación inválida',
+                            this.advertencia_segmentacion,
                             'warning'
                         );
                         return;
@@ -718,10 +861,99 @@ function wizardCampania(campania = null) {
                 }
             }
 
-            if (this.step == 3) {
+           if (this.step == 3) {
+
                 if (!this.mensaje) {
                     this.errores.mensaje = true;
+
+                    this.mostrarModal(
+                        'Mensaje requerido',
+                        'Debe escribir el mensaje de la campaña.',
+                        'warning'
+                    );
+
                     return;
+                }
+                   const MIN_MENSAJE = 10;
+    const MAX_MENSAJE = 500;
+
+    // Validar vacío
+    if (!this.mensaje || !this.mensaje.trim()) {
+
+        this.errores.mensaje = true;
+
+        this.mostrarModal(
+            'Mensaje requerido',
+            'Debe escribir el mensaje de la campaña.',
+            'warning'
+        );
+
+        return;
+    }
+
+    // Validar mínimo
+    if (this.mensaje.trim().length < MIN_MENSAJE) {
+
+        this.mostrarModal(
+            'Mensaje demasiado corto',
+            `El mensaje debe tener al menos ${MIN_MENSAJE} caracteres.`,
+            'warning'
+        );
+
+        return;
+    }
+
+    // Validar máximo
+    if (this.mensaje.length > MAX_MENSAJE) {
+
+        this.mostrarModal(
+            'Mensaje demasiado largo',
+            `El mensaje no puede superar los ${MAX_MENSAJE} caracteres.`,
+            'warning'
+        );
+
+        return;
+    }
+                // VALIDAR ADJUNTO
+                if (this.adjuntoFile) {
+
+                    const tiposPermitidos = [
+                        'image/jpeg',
+                        'image/png',
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                    ];
+
+                    const maxSize = 10 * 1024 * 1024; // 10MB
+
+                    // Validar tipo
+                    if (!tiposPermitidos.includes(this.adjuntoFile.type)) {
+
+                        this.adjuntoFile = null;
+
+                        this.mostrarModal(
+                            'Archivo inválido',
+                            'Solo se permiten archivos JPG, PNG, PDF, DOC y DOCX.',
+                            'warning'
+                        );
+
+                        return;
+                    }
+
+                    // Validar tamaño
+                    if (this.adjuntoFile.size > maxSize) {
+
+                        this.adjuntoFile = null;
+
+                        this.mostrarModal(
+                            'Archivo demasiado grande',
+                            'El archivo no puede superar los 10MB.',
+                            'warning'
+                        );
+
+                        return;
+                    }
                 }
             }
 
@@ -741,7 +973,6 @@ function wizardCampania(campania = null) {
             this.errores = {};
             this.advertencia_segmentacion = '';
             this.alcance = 0;
-            this.loadingSegmentacion = true;
 
             const payload = {
                 segmentacion_tipo: this.segmentacion_tipo,
@@ -754,7 +985,22 @@ function wizardCampania(campania = null) {
                 ultima_atencion_hasta: this.ultima_atencion_hasta,
                 segmentacion_sql: this.segmentacion_sql
             };
+            if (this.segmentacion_tipo === 'filtros') {
+                if (parseInt(this.edad_min) > parseInt(this.edad_max)) {
+                    this.mostrarModal('Validación', 'La edad mínima no puede ser mayor a la edad máxima', 'warning');
+                    return false;
+                }
 
+                if (!this.ultima_atencion_desde || !this.ultima_atencion_hasta) {
+                    this.mostrarModal('Validación', 'Debe ingresar el rango de fechas de atención para probar la segmentación.', 'warning');
+                    return false;
+                }
+
+                if (this.ultima_atencion_desde > this.ultima_atencion_hasta) {
+                    this.mostrarModal('Validación', 'La fecha desde no puede ser mayor a la fecha hasta.', 'warning');
+                    return false;
+                }
+            }
             try {
                 const response = await fetch("{{ route('campanias.probar-segmentacion') }}", {
                     method: 'POST',
@@ -769,8 +1015,40 @@ function wizardCampania(campania = null) {
                 console.log('RESPUESTA CRUDA:', raw);
                 
                   let data = {};
+                  this.loadingSegmentacion = true;
                     try {
                         data = JSON.parse(raw);
+                        this.alcance = data.cantidad ?? 0;
+                        this.advertencia_segmentacion = data.advertencia ?? '';
+
+                        if (this.alcance <= 0) {
+                            this.segmentacionProbada = false;
+                            this.mostrarModal(
+                                'Segmentación inválida',
+                                'La segmentación no arrojó pacientes.',
+                                'warning'
+                            );
+
+                            return false;
+                           
+                        }
+
+                        if (data.supera_maximo) {
+                            this.segmentacionProbada = false;
+
+                            this.mostrarModal(
+                                'Segmentación inválida',
+                                data.advertencia,
+                                'warning'
+                            );
+
+                            return false;
+                        }
+
+                        this.segmentacionProbada = true;
+                        this.segmentacionModificada = false;
+
+                        return true;
                     } catch (jsonError) {
                         console.error('La respuesta no es JSON válido:', raw);
                         this.mostrarModal(
@@ -801,7 +1079,7 @@ function wizardCampania(campania = null) {
                 this.alcance = data.cantidad ?? 0;
                 this.advertencia_segmentacion = data.advertencia ?? '';
                 this.segmentacionProbada = true;
-this.segmentacionModificada = false;
+                this.segmentacionModificada = false;
                 return true;
 
             } catch (e) {
@@ -812,7 +1090,7 @@ this.segmentacionModificada = false;
                     'error'
                 );
                 return false;
-            }finally {
+            } finally {
                 this.loadingSegmentacion = false; // 👈 termina carga SIEMPRE
             }
         },

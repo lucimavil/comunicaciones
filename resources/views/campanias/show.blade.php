@@ -3,11 +3,7 @@
 @section('content')
 <div class="container py-4">
     <h3 class="fw-bold mb-1">Detalle de la Campaña</h3>
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+
 
 @if($errors->has('general'))
     <div class="alert alert-danger">
@@ -52,15 +48,15 @@
                 {{ $campania->cantidad_destinatarios ?? 0 }}
             </div>
         </div>
-
+@php
+    $costoPorMensaje = 0.02;
+@endphp
         <!-- Costo -->
         <div class="p-3 rounded" style="background:#e9f7ef;">
             <div class="text-muted small">Costo estimado de la campaña</div>
             <div class="fw-bold text-success">
-                USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * 0.05, 2) }}
-            </div>
-            <small class="text-muted">(USD 0.050 por mensaje)</small>
-        </div>
+USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * $costoPorMensaje, 2) }}            </div>
+<small class="text-muted">(USD {{ number_format($costoPorMensaje, 3) }} por mensaje)</small>        </div>
     </div>
 </div>
 <div class="card border-0 shadow-sm">
@@ -68,14 +64,16 @@
         <h6 class="fw-bold mb-3">Filtros aplicados</h6>
 
         @if($campania->segmentacion_tipo === 'sql')
-            <pre class="small bg-light p-2 rounded">
-{{ $campania->segmentacion_sql }}
-            </pre>
+            <div class="small text-muted mb-2">Consulta SQL avanzada</div>
+            <pre class="small bg-light p-3 rounded border" style="white-space: pre-wrap;">{{ $campania->segmentacion_sql ?: '-' }}</pre>
         @else
             <div class="small">
-                <div>Edad: {{ $campania->edad_min }} - {{ $campania->edad_max }} años</div>
-                <div>Sexo: {{ $campania->sexo ?: 'Todos' }}</div>
-                <div>Localidad: {{ $campania->localidad ?: 'Todas' }}</div>
+                <div><strong>Rango de edad:</strong> {{ $campania->edad_min ?? '-' }} - {{ $campania->edad_max ?? '-' }} años</div>
+                <div><strong>Sexo:</strong> {{ $campania->sexo ?: 'Todos' }}</div>
+                <div><strong>Localidad:</strong> {{ $campania->localidad ?: 'Todas' }}</div>
+                <div><strong>Diagnóstico:</strong> {{ $campania->diagnostico ?: 'Todos' }}</div>
+                <div><strong>Última atención desde:</strong> {{ optional($campania->ultima_atencion_desde)->format('d/m/Y') ?: '-' }}</div>
+                <div><strong>Última atención hasta:</strong> {{ optional($campania->ultima_atencion_hasta)->format('d/m/Y') ?: '-' }}</div>
             </div>
         @endif
     </div>
@@ -104,17 +102,24 @@
             >
         </div>
     </div>
-    <div class="col-md-6 mt-3">
-              <h6 class="fw-bold mb-3">Fecha programada</h6>
-            <div>
-                @if($campania->fecha_programada)
-                    {{ $campania->fecha_programada->format('d/m/Y H:i') }}
-                @else
-                    Sin programar
-                @endif
-            </div>
-        </div>
+    
 @endif
+<div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+        <h6 class="fw-bold mb-3">Programación</h6>
+
+        @if($campania->fecha_programada)
+            <div class="p-3 rounded" style="background:#fff7e6;">
+                <div class="text-muted small">Día y hora de ejecución</div>
+                <div class="fw-bold">
+                    {{ $campania->fecha_programada->format('d/m/Y H:i') }}
+                </div>
+            </div>
+        @else
+            <div class="text-muted small">Sin programar</div>
+        @endif
+    </div>
+</div>
 </div>
 <div class="d-grid gap-2">
 @if($campania->puedeEditarse())
@@ -200,6 +205,42 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         let modal = new bootstrap.Modal(document.getElementById('modalProgramarCampania'));
+        modal.show();
+    });
+</script>
+@endif
+@if(session('success') || $errors->has('general'))
+<div class="modal fade" id="modalMensajeCampania" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header {{ session('success') ? 'bg-success text-white' : 'bg-danger text-white' }}">
+                <h5 class="modal-title">
+                    {{ session('success') ? 'Operación exitosa' : 'Error' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-0">
+                    {{ session('success') ?: $errors->first('general') }}
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = new bootstrap.Modal(
+            document.getElementById('modalMensajeCampania')
+        );
+
         modal.show();
     });
 </script>
