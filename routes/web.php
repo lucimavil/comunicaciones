@@ -48,8 +48,9 @@ Route::middleware(['auth'])->group(function () {
     ->name('campanias.guardar-borrador');
 
     Route::get('/campanias/{id}/edit', [CampaniaController::class, 'edit'])->name('campanias.edit');
-    Route::patch('/campanias/{campania}/cancelar', [CampaniaController::class, 'cancelar'])
-    ->name('campanias.cancelar');
+ 
+    Route::delete('/campanias/{campania}', [CampaniaController::class, 'destroy'])
+    ->name('campanias.destroy');
 
     // MODULO ENCUESTAS
     //MODULO MENSAJERIA

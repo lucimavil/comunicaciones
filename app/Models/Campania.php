@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
  use Carbon\Carbon;
+ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Campania extends Model
 {
+     use SoftDeletes;
     protected $fillable = [
         // 🧾 Datos generales
         'titulo',

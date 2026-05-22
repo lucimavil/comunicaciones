@@ -8,10 +8,19 @@ use App\Models\Segmento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
+use App\Services\MensajeriaService;
 
 class CampaniaController extends Controller
 {
+   public function __construct()
+{
+    $this->baseUrl = config('services.mensajeria.url')
+        ?? env('MENSAJERIA_API_URL')
+        ?? 'https://hrc-mensajeria.sanluis.gob.ar:8081';
+}
     public function index()
     {
         $campaniasActivas = Campania::whereIn('estado', ['borrador', 'programada'])
@@ -315,12 +324,29 @@ protected function consultarCantidadSegmentacionEnApi(string $sql): array
 
     return $data;
 }
-  public function probarSegmentacion(Request $request)
-{
+ 
+public function probarSegmentacion(Request $request,MensajeriaService $mensajeriaService) {
     try {
         $segmentacion = $this->resolverSegmentacion($request);
 
-        $cantidad = $segmentacion['cantidad'];
+        $sqlQuery = $segmentacion['sql'];
+
+        $response = $mensajeriaService->contarPacientes($sqlQuery);
+
+        if (!$response->successful()) {
+            return response()->json([
+                'message' => 'No se pudo obtener la cantidad de pacientes desde mensajería.',
+                'error_real' => $response->body(),
+            ], 500);
+        }
+
+        $data = $response->json();
+
+        $cantidad = $data['cantidad']
+            ?? $data['count']
+            ?? $data['total']
+            ?? 0;
+
         $advertencia = '';
 
         if ($cantidad === 0) {
@@ -336,13 +362,17 @@ protected function consultarCantidadSegmentacionEnApi(string $sql): array
         return response()->json([
             'cantidad' => $cantidad,
             'advertencia' => $advertencia,
-            'sql_generada' => $segmentacion['sql'],
+            'supera_maximo' => $cantidad > $maxPacientes,
+            'sql_generada' => $sqlQuery,
+            'respuesta_api' => $data,
         ]);
+
     } catch (ValidationException $e) {
         return response()->json([
             'message' => 'Error de validación',
             'errors' => $e->errors(),
         ], 422);
+
     } catch (\Throwable $e) {
         report($e);
 
@@ -623,10 +653,29 @@ public function guardarBorrador(Request $request)
                 ? 'imagen'
                 : 'documento';
         }
-
         $campania->save();
-
+        
         DB::commit();
+        if ($campania->exists && $campania->estado === 'programada') {
+
+            $mensajeriaService = app(\App\Services\MensajeriaService::class);
+
+            $payload = [
+                'sqlQuery' => $campania->segmentacion_sql,
+                'message' => $campania->mensaje,
+                'scheduledAt' => Carbon::parse($campania->fecha_programada)->format('Y-m-d\TH:i:s'),
+            ];
+
+            $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
+
+            if (!$response->successful()) {
+                throw new \Exception(
+                    'No se pudo actualizar la campaña en mensajería. ' . $response->body()
+                );
+            }
+        }
+
+       
 
         return response()->json([
             'ok' => true,
@@ -645,30 +694,19 @@ public function guardarBorrador(Request $request)
         ], 500);
     }
 }
-public function cancelar(Campania $campania)
-{
-    if ($campania->estado === 'cancelada') {
-        return response()->json([
-            'message' => 'La campaña ya está cancelada.'
-        ], 422);
-    }
 
-    $campania->estado = 'cancelada';
-    $campania->save();
-
-    return response()->json([
-        'ok' => true,
-        'message' => 'Campaña cancelada correctamente.'
-    ]);
-}
  public function show($id)
 {
     $campania = Campania::with('responsable')->findOrFail($id);
 
     return view('campanias.show', compact('campania'));
 }
- public function programar(Request $request, Campania $campania)
-{
+
+public function programar(
+    Request $request,
+    Campania $campania,
+    MensajeriaService $mensajeriaService
+) {
     if (!$campania->puedeEditarse()) {
         return redirect()
             ->back()
@@ -683,13 +721,47 @@ public function cancelar(Campania $campania)
         'fecha_programada.after' => 'La fecha de programación debe ser futura.',
     ]);
 
-    $campania->fecha_programada = $request->fecha_programada;
-    $campania->estado = 'programada';
-    $campania->save();
+    $sqlQuery = $campania->segmentacion_sql;
 
-    return redirect()
-        ->route('campanias.show', $campania->id)
-        ->with('success', 'Campaña programada correctamente.');
+    if (!$sqlQuery) {
+        return redirect()
+            ->back()
+            ->withErrors(['general' => 'La campaña no tiene una consulta SQL de segmentación guardada.']);
+    }
+
+    $payload = [
+        'campaignId' => $campania->id,
+        'sqlQuery' => $sqlQuery,
+        'message' => $campania->mensaje,
+        'scheduledAt' => Carbon::parse($request->fecha_programada)->format('Y-m-d\TH:i:s'),
+    ];
+
+    try {
+        $response = $mensajeriaService->crearCampania($payload);
+
+        if (!$response->successful()) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'general' => 'No se pudo programar la campaña en la API de mensajería. ' . $response->body()
+                ]);
+        }
+
+        $campania->fecha_programada = $request->fecha_programada;
+        $campania->estado = 'programada';
+        $campania->save();
+
+        return redirect()
+            ->route('campanias.show', $campania->id)
+            ->with('success', 'Campaña programada correctamente.');
+
+    } catch (\Exception $e) {
+        return redirect()
+            ->back()
+            ->withErrors([
+                'general' => 'Error al conectar con la API de mensajería: ' . $e->getMessage()
+            ]);
+    }
 }
    public function edit(Campania $campania)
 {
@@ -708,9 +780,47 @@ public function cancelar(Campania $campania)
     {
         //
     }
+  public function destroy(
+        Campania $campania,
+        MensajeriaService $mensajeriaService
+    ) {
+        if (!$campania->puedeEditarse()) {
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'general' => 'La campaña no puede eliminarse porque ya pasó la fecha de programación.'
+                ]);
+        }
 
-    public function destroy(Campania $campania)
-    {
-        //
+        if ($campania->estado === 'programada') {
+            try {
+                $response = $mensajeriaService->eliminarCampania($campania->id);
+
+                if (!$response->successful()) {
+                    return redirect()
+                        ->back()
+                        ->withErrors([
+                            'general' => 'No se pudo eliminar la campaña en la API de mensajería.'
+                        ]);
+                }
+
+            } catch (\Exception $e) {
+                return redirect()
+                    ->back()
+                    ->withErrors([
+                        'general' => 'Error al conectar con la API de mensajería: ' . $e->getMessage()
+                    ]);
+            }
+        }
+
+        $campania->estado = 'eliminada';
+        $campania->save();
+
+        $campania->delete();
+
+        return redirect()
+            ->route('campanias.index')
+            ->with('success', 'Campaña eliminada correctamente.');
     }
+    
 }

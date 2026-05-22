@@ -21,6 +21,7 @@
         'segmentacion_sql' => $campania->segmentacion_sql,
         'alcance' => $campania->cantidad_destinatarios,
         'mensaje' => $campania->mensaje,
+        'fecha_programada' => optional($campania->fecha_programada)?->format('Y-m-d\TH:i'),
         'adjunto_path' => $campania->adjunto_path,
         'adjunto_nombre' => $campania->adjunto_nombre,
         'adjunto_tipo_mime' => $campania->adjunto_tipo_mime,
@@ -362,6 +363,7 @@ La consulta debe traer campos con esos alias">
     <label class="form-label">Adjuntar imagen o documento</label>
     <input
     type="file"
+    name="adjunto"
     class="form-control"
     accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
     @change="
@@ -515,13 +517,13 @@ La consulta debe traer campos con esos alias">
 
     <!-- PDF NUEVO -->
     <template x-if="adjuntoFile && adjuntoFile.type === 'application/pdf'">
-        <div class="text-center w-100 overflow-hidden">
-    <img
+    <iframe
         :src="adjuntoPreview"
-        class="img-fluid rounded shadow border"
-        style="width: 100%; max-width: 320px; max-height: 260px; object-fit: contain;">
-</div>
-    </template>
+        width="100%"
+        height="420"
+        class="border rounded">
+    </iframe>
+</template>
 
     <!-- DOC/DOCX NUEVO -->
     <template x-if="adjuntoFile &&
@@ -573,8 +575,17 @@ La consulta debe traer campos con esos alias">
             Sin archivo adjunto
         </div>
     </template>
+   
 </div>
+ <div x-show="fecha_programada" class="border rounded p-3 bg-light">
+        <div class="small text-muted">
+            Fecha programada
+        </div>
 
+        <div class="fw-semibold">
+            <span x-text="fecha_programada"></span>
+        </div>
+    </div>
                 </div>
             </div>
            
@@ -742,7 +753,7 @@ function wizardCampania(campania = null) {
         segmentacion_sql: campania?.segmentacion_sql ?? '',
 
         alcance: campania?.alcance ?? 0,
-
+        fecha_programada: campania?.fecha_programada ?? '',
         mensaje: campania?.mensaje ?? '',
         adjuntoFile: null,
         adjunto_path: campania?.adjunto_path ?? '',
@@ -969,7 +980,8 @@ function wizardCampania(campania = null) {
             }
         },
         async probarSegmentacion() {
-
+            if (this.loadingSegmentacion) return;
+            this.loadingSegmentacion = true;
             this.errores = {};
             this.advertencia_segmentacion = '';
             this.alcance = 0;
@@ -1115,73 +1127,107 @@ function wizardCampania(campania = null) {
             return total.toFixed(2);
         },
     async guardarBorrador() {
-        if (this.loadingGuardar) return;
+    if (this.loadingGuardar) return;
 
-        this.errores = {};
-         this.loadingGuardar = true;
+    this.errores = {};
+    this.loadingGuardar = true;
 
+    const formData = new FormData();
 
-        const formData = new FormData();
-        formData.append('id', this.id ?? '');
-        formData.append('nombre', this.nombre ?? '');
-        formData.append('descripcion', this.descripcion ?? '');
-        formData.append('solicitante', this.solicitante ?? '');
-        formData.append('segmentacion_modificada', this.segmentacionModificada ? '1' : '0');
+    formData.append('id', this.id ?? '');
+    formData.append('nombre', this.nombre ?? '');
+    formData.append('descripcion', this.descripcion ?? '');
+    formData.append('solicitante', this.solicitante ?? '');
+    formData.append('segmentacion_modificada', this.segmentacionModificada ? '1' : '0');
 
-        formData.append('segmentacion_tipo', this.segmentacion_tipo ?? 'filtros');
-        formData.append('edad_min', this.edad_min ?? '');
-        formData.append('edad_max', this.edad_max ?? '');
-        formData.append('sexo', this.sexo ?? '');
-        formData.append('localidad', this.localidad ?? '');
-        formData.append('diagnostico', this.diagnostico ?? '');
-        formData.append('ultima_atencion_desde', this.ultima_atencion_desde ?? '');
-        formData.append('ultima_atencion_hasta', this.ultima_atencion_hasta ?? '');
-        formData.append('segmentacion_sql', this.segmentacion_sql ?? '');
+    formData.append('segmentacion_tipo', this.segmentacion_tipo ?? 'filtros');
+    formData.append('edad_min', this.edad_min ?? '');
+    formData.append('edad_max', this.edad_max ?? '');
+    formData.append('sexo', this.sexo ?? '');
+    formData.append('localidad', this.localidad ?? '');
+    formData.append('diagnostico', this.diagnostico ?? '');
+    formData.append('ultima_atencion_desde', this.ultima_atencion_desde ?? '');
+    formData.append('ultima_atencion_hasta', this.ultima_atencion_hasta ?? '');
+    formData.append('segmentacion_sql', this.segmentacion_sql ?? '');
 
-        formData.append('mensaje', this.mensaje ?? '');
+    formData.append('mensaje', this.mensaje ?? '');
 
-        if (this.adjuntoFile) {
-            formData.append('adjunto', this.adjuntoFile);
-        }
+    if (this.adjuntoFile) {
+        formData.append('adjunto', this.adjuntoFile);
+    }
+
+    try {
+        const response = await fetch("{{ route('campanias.guardar-borrador') }}", {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: formData,
+        });
+
+        const raw = await response.text();
+        console.log('RESPUESTA GUARDAR:', raw);
+
+        let data = {};
 
         try {
-            const response = await fetch("{{ route('campanias.guardar-borrador') }}", {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
-                body: formData,
-            });
+            data = JSON.parse(raw);
+        } catch (e) {
+            this.mostrarModal(
+                'Error inesperado',
+                'El servidor no devolvió JSON. Revisá la consola para ver el error real.',
+                'error'
+            );
+            return;
+        }
 
-        const data = await response.json();
-
-            if (!response.ok) {
-                if (data.errors) {
-                    this.errores = data.errors;
-                } else {
-                    this.errores.general = [data.message || 'No se pudo guardar '];
-                }
-                return;
+        if (!response.ok) {
+            if (data.errors) {
+                this.errores = data.errors;
+            } else {
+                this.mostrarModal(
+                    'No se pudo guardar',
+                    data.error_real || data.message || 'Error del servidor',
+                    'error'
+                );
             }
 
-            this.id = data.id;
-            this.alcance = data.cantidad ?? 0;
-            this.advertencia_segmentacion = data.advertencia ?? '';
-            this.segmentacion_sql = data.sql_generada ?? this.segmentacion_sql;
+            return;
+        }
 
+        this.id = data.id;
+        this.alcance = data.cantidad ?? 0;
+        this.advertencia_segmentacion = data.advertencia ?? '';
+        this.segmentacion_sql = data.sql_generada ?? this.segmentacion_sql;
+
+        if (data.warning) {
+            this.mostrarModal(
+                'Campaña guardada con advertencia',
+                data.message + ' Detalle: ' + data.warning,
+                'warning'
+            );
+        } else {
             this.mostrarModal(
                 'Campaña guardada',
                 data.message || 'Campaña guardada',
                 'success'
             );
-        } catch (e) {
-             console.error(e);
-            this.errores.general = ['Error al guardar'];
-        } finally {
+        }
+
+    } catch (e) {
+        console.error(e);
+
+        this.mostrarModal(
+            'Error de conexión',
+            'No se pudo conectar con el servidor.',
+            'error'
+        );
+
+    } finally {
         this.loadingGuardar = false;
     }
-    },
+},
        async ejecutarAhora() {
                 const response = await fetch('/campanias', {
                     method: 'POST',

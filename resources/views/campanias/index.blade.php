@@ -171,13 +171,64 @@
                                     <i class="bi bi-pencil"></i>
                                 </a>
                             @endif
-                
+                            @if(in_array($estado, ['programada', 'borrador']) && $campania->puedeEditarse())
+                                
+
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-light border text-danger"
+                                title="Eliminar campaña"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modalEliminarCampania{{ $campania->id }}"
+                            >
+                                <i class="bi bi-trash"></i>
+                            </button>
+                               
+                            @endif
                              <a href="{{ route('campanias.show', $campania->id) }}" class="btn btn-sm btn-light border">
                                     <i class="bi bi-eye"></i>
                                 </a>
                         </td>
                     </tr>
-                  
+                  <div class="modal fade"
+     id="modalEliminarCampania{{ $campania->id }}"
+     tabindex="-1"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar eliminación</h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-start">
+                ¿Estás segura de que querés eliminar la campaña
+                <strong>{{ $campania->titulo }}</strong>?
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-light border"
+                        data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <form action="{{ route('campanias.destroy', $campania->id) }}"
+                      method="POST"
+                      class="d-inline">
+                    @csrf
+                    @method('DELETE')
+
+                    <button type="submit" class="btn btn-danger">
+                        Sí, eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
                 @empty
                     <tr>
                         <td colspan="7" class="text-center text-secondary py-4">
@@ -238,5 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 </div>
+
 @endsection
            

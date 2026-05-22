@@ -90,19 +90,47 @@ USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * $costoPorMensaje
             {{ $campania->mensaje }}
         </div>
     </div>
-    @if(!empty($campania->adjunto_path) && str_starts_with($campania->adjunto_tipo_mime, 'image/'))
+   @if(!empty($campania->adjunto_path))
     <div class="mt-3">
-        <label class="form-label fw-bold">Imagen adjunta</label>
+        <label class="form-label fw-bold">Archivo adjunto</label>
 
-        <div class="border rounded p-2 bg-light">
-            <img 
-                src="{{ asset('storage/' . $campania->adjunto_path) }}" 
-                class="img-fluid rounded"
-                style="max-height: 250px;"
-            >
-        </div>
+        @if(str_starts_with($campania->adjunto_tipo_mime, 'image/'))
+            <div class="border rounded p-2 bg-light">
+                <img 
+                    src="{{ asset('storage/' . $campania->adjunto_path) }}" 
+                    class="img-fluid rounded"
+                    style="max-height: 250px;"
+                >
+            </div>
+
+        @elseif($campania->adjunto_tipo_mime === 'application/pdf')
+            <div class="border rounded bg-light p-2">
+                <iframe
+                    src="{{ asset('storage/' . $campania->adjunto_path) }}"
+                    width="100%"
+                    height="500"
+                    class="border rounded">
+                </iframe>
+            </div>
+
+            <a href="{{ asset('storage/' . $campania->adjunto_path) }}"
+               target="_blank"
+               class="btn btn-sm btn-primary mt-2">
+                Abrir PDF
+            </a>
+
+        @else
+            <div class="border rounded p-3 bg-light d-flex justify-content-between align-items-center">
+                <span>{{ $campania->adjunto_nombre }}</span>
+
+                <a href="{{ asset('storage/' . $campania->adjunto_path) }}"
+                   target="_blank"
+                   class="btn btn-sm btn-primary">
+                    Ver archivo
+                </a>
+            </div>
+        @endif
     </div>
-    
 @endif
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
