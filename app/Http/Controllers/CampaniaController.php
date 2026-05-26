@@ -291,7 +291,7 @@ protected function resolverSegmentacion(Request $request,MensajeriaService $mens
 
     return [
         'sql' => $sql,
-        'cantidad' => (int) ($data['cantidad'] ?? 0),
+        'count' => (int) ($data['count'] ?? 0),
     ];
 }
 protected function consultarCantidadSegmentacionEnApi(
@@ -299,7 +299,7 @@ protected function consultarCantidadSegmentacionEnApi(
     MensajeriaService $mensajeriaService
 ): array {
     $response = $mensajeriaService->contarPacientes($sql);
-dd($response);
+//dd($response);
     if (!$response->successful()) {
         throw ValidationException::withMessages([
             'segmentacion_sql' => [
