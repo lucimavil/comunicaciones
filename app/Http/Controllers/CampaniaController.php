@@ -603,7 +603,7 @@ public function guardarBorrador(Request $request)
         $campania->ultima_atencion_hasta = $request->ultima_atencion_hasta ?: null;
 
        if ($request->segmentacion_tipo === 'filtros') {
-            $segmentacion = $this->resolverSegmentacion($request);
+            $segmentacion = $this->resolverSegmentacion($request,$mensajeriaService);
 
             $campania->segmentacion_sql = $segmentacion['sql'];
             $campania->cantidad_destinatarios = $segmentacion['cantidad'];
@@ -613,7 +613,7 @@ public function guardarBorrador(Request $request)
                 || $request->boolean('segmentacion_modificada');
 
             if ($debeResolverSegmentacion) {
-                $segmentacion = $this->resolverSegmentacion($request);
+                $segmentacion = $this->resolverSegmentacion($request,$mensajeriaService);
 
                 $campania->segmentacion_sql = $segmentacion['sql'];
                 $campania->cantidad_destinatarios = $segmentacion['cantidad'];

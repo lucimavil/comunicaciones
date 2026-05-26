@@ -1022,11 +1022,10 @@ function wizardCampania(campania = null) {
                     body: JSON.stringify(payload),
                 });
                 const raw = await response.text();
-                console.log('RESPUESTA CRUDA:', raw);
-                
                   let data = {};
                     try {
                         data = JSON.parse(raw);
+                        dd(data);
                         this.alcance = data.cantidad ?? 0;
                         this.advertencia_segmentacion = data.advertencia ?? '';
 
