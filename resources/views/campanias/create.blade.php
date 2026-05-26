@@ -613,22 +613,19 @@ La consulta debe traer campos con esos alias">
             Atrás
         </button>
 
-        
-    <button 
+  <button
     type="button"
-    class="btn btn-info"
-    x-show="step == 2"
-    @click.prevent="abrirResultado()"
+    class="btn btn-primary"
+    @click="probarSegmentacion"
     :disabled="loadingSegmentacion"
+      x-show="step > 1"
 >
-    <span x-show="!loadingSegmentacion">
-        Probar segmentación
-    </span>
+    <span
+        x-show="loadingSegmentacion"
+        class="spinner-border spinner-border-sm me-1"
+    ></span>
 
-    <span x-show="loadingSegmentacion">
-        <span class="spinner-border spinner-border-sm me-2"></span>
-        Calculando pacientes...
-    </span>
+    <span x-text="loadingSegmentacion ? 'Calculando pacientes...' : 'Probar segmentación'"></span>
 </button>
         <button
             type="button"
@@ -981,7 +978,6 @@ function wizardCampania(campania = null) {
         },
         async probarSegmentacion() {
             if (this.loadingSegmentacion) return;
-            this.loadingSegmentacion = true;
             this.errores = {};
             this.advertencia_segmentacion = '';
             this.alcance = 0;
@@ -1013,6 +1009,8 @@ function wizardCampania(campania = null) {
                     return false;
                 }
             }
+            
+            this.loadingSegmentacion = true;
             try {
                 const response = await fetch("{{ route('campanias.probar-segmentacion') }}", {
                     method: 'POST',
@@ -1027,7 +1025,6 @@ function wizardCampania(campania = null) {
                 console.log('RESPUESTA CRUDA:', raw);
                 
                   let data = {};
-                  this.loadingSegmentacion = true;
                     try {
                         data = JSON.parse(raw);
                         this.alcance = data.cantidad ?? 0;
