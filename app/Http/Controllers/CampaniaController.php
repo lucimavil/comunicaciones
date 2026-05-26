@@ -296,20 +296,18 @@ protected function resolverSegmentacion(Request $request): array
 }
 protected function consultarCantidadSegmentacionEnApi(string $sql): array
 {
-    $baseUrl = rtrim(config('services.hospital_api.url'), '/');
-    $token = config('services.hospital_api.token');
-
     $response = Http::timeout(60)
+        ->withoutVerifying() // solo si sigue el problema SSL
         ->acceptJson()
-        ->post($baseUrl . '/campanias/segmentacion/contar', [
+        ->post($this->baseUrl . '/campaigns/count', [
             'sql' => $sql,
-            'token' => $token,
         ]);
 
-    if (!$response->ok()) {
+    if (!$response->successful()) {
         throw ValidationException::withMessages([
             'segmentacion_sql' => [
-                'Error al consultar la API externa: ' . ($response->json('message') ?? $response->body())
+                'Error al consultar mensajería: ' .
+                ($response->json('message') ?? $response->body())
             ]
         ]);
     }
@@ -318,7 +316,9 @@ protected function consultarCantidadSegmentacionEnApi(string $sql): array
 
     if (!is_array($data)) {
         throw ValidationException::withMessages([
-            'segmentacion_sql' => ['La API externa no devolvió un JSON válido']
+            'segmentacion_sql' => [
+                'Mensajería no devolvió un JSON válido'
+            ]
         ]);
     }
 
