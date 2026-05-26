@@ -37,7 +37,7 @@ class MensajeriaService
     public function contarPacientes(string $sqlQuery)
     {
          return $this->http()->post($this->baseUrl . '/campaigns/count', [
-                'sqlQuery' => $sqlQuery,
+                'sql' => $sqlQuery,
             ]);
     }
 

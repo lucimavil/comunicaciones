@@ -270,7 +270,7 @@ class CampaniaController extends Controller
 
         return view('dashboard', compact('campanias'));
     }
-protected function resolverSegmentacion(Request $request): array
+protected function resolverSegmentacion(Request $request,MensajeriaService $mensajeriaService): array
 {
     if ($request->segmentacion_tipo === 'sql') {
         $sql = trim($request->segmentacion_sql ?? '');
@@ -287,22 +287,19 @@ protected function resolverSegmentacion(Request $request): array
         $this->validarSqlSegmentacion($sql);
     }
 
-    $data = $this->consultarCantidadSegmentacionEnApi($sql);
+   $data = $this->consultarCantidadSegmentacionEnApi($sql, $mensajeriaService);
 
     return [
         'sql' => $sql,
         'cantidad' => (int) ($data['cantidad'] ?? 0),
     ];
 }
-protected function consultarCantidadSegmentacionEnApi(string $sql): array
-{
-    $response = Http::timeout(60)
-        ->withoutVerifying() // solo si sigue el problema SSL
-        ->acceptJson()
-        ->post($this->baseUrl . '/campaigns/count', [
-            'sql' => $sql,
-        ]);
-
+protected function consultarCantidadSegmentacionEnApi(
+    string $sql,
+    MensajeriaService $mensajeriaService
+): array {
+    $response = $mensajeriaService->contarPacientes($sql);
+dd($response);
     if (!$response->successful()) {
         throw ValidationException::withMessages([
             'segmentacion_sql' => [
@@ -314,20 +311,12 @@ protected function consultarCantidadSegmentacionEnApi(string $sql): array
 
     $data = $response->json();
 
-    if (!is_array($data)) {
-        throw ValidationException::withMessages([
-            'segmentacion_sql' => [
-                'Mensajería no devolvió un JSON válido'
-            ]
-        ]);
-    }
-
-    return $data;
+    return is_array($data) ? $data : [];
 }
  
 public function probarSegmentacion(Request $request,MensajeriaService $mensajeriaService) {
     try {
-        $segmentacion = $this->resolverSegmentacion($request);
+        $segmentacion = $this->resolverSegmentacion($request,$mensajeriaService);
 
         $sqlQuery = $segmentacion['sql'];
 
