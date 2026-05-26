@@ -289,9 +289,10 @@ protected function resolverSegmentacion(Request $request,MensajeriaService $mens
 
    $data = $this->consultarCantidadSegmentacionEnApi($sql, $mensajeriaService);
 
+   
     return [
         'sql' => $sql,
-        'count' => (int) ($data['count'] ?? 0),
+        'cantidad' => (int) ($data['count'] ?? 0),
     ];
 }
 protected function consultarCantidadSegmentacionEnApi(
@@ -530,7 +531,7 @@ public function probarSegmentacion(Request $request,MensajeriaService $mensajeri
         ];
     }
 
-public function guardarBorrador(Request $request)
+public function guardarBorrador(Request $request,MensajeriaService $mensajeriaService)
 {
     $usuario = auth()->user();
 

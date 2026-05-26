@@ -618,7 +618,7 @@ La consulta debe traer campos con esos alias">
     class="btn btn-primary"
     @click="probarSegmentacion"
     :disabled="loadingSegmentacion"
-      x-show="step > 1"
+      x-show="step === 2"
 >
     <span
         x-show="loadingSegmentacion"
@@ -1025,9 +1025,7 @@ function wizardCampania(campania = null) {
                   let data = {};
                     try {
                         data = JSON.parse(raw);
-                        dd(data);
                         this.alcance = data.cantidad ?? 0;
-                        this.advertencia_segmentacion = data.advertencia ?? '';
 
                         if (this.alcance <= 0) {
                             this.segmentacionProbada = false;
@@ -1041,17 +1039,22 @@ function wizardCampania(campania = null) {
                            
                         }
 
-                        if (data.supera_maximo) {
+                        if (data.cantidad>6000 ) {
                             this.segmentacionProbada = false;
 
                             this.mostrarModal(
                                 'Segmentación inválida',
-                                data.advertencia,
+                                'Supera el máximo de mensajes por campaña. Debe ser menor a 6000 pacientes',
                                 'warning'
                             );
 
                             return false;
                         }
+                this.mostrarModal(
+                    'Segmentación probada',
+                    `La segmentación arroja ${this.alcance} pacientes.`,
+                    'success'
+                );
 
                         this.segmentacionProbada = true;
                         this.segmentacionModificada = false;
@@ -1163,7 +1166,6 @@ function wizardCampania(campania = null) {
         });
 
         const raw = await response.text();
-        console.log('RESPUESTA GUARDAR:', raw);
 
         let data = {};
 
