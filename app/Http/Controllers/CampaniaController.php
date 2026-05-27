@@ -712,9 +712,9 @@ public function programar(
         'fecha_programada.after' => 'La fecha de programación debe ser futura.',
     ]);
 
-    $sqlQuery = trim($campania->segmentacion_sql);
+    $sqlQuery = trim((string) $campania->segmentacion_sql);
 
-    if (!$sqlQuery) {
+    if ($sqlQuery === '') {
         return redirect()
             ->back()
             ->withErrors([
@@ -726,16 +726,12 @@ public function programar(
         'campaignId' => $campania->id,
         'sqlQuery' => $sqlQuery,
         'message' => $campania->mensaje,
-        'scheduledAt' => Carbon::parse($request->fecha_programada)
-            ->format('Y-m-d\TH:i:s'),
+        'scheduledAt' => Carbon::parse($request->fecha_programada)->format('Y-m-d\TH:i:s'),
     ];
 
-   try {
+    try {
         if ($campania->estado === 'programada') {
-            $response = $mensajeriaService->actualizarCampania(
-                $campania->id,
-                $payload
-            );
+            $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
         } else {
             $response = $mensajeriaService->crearCampania($payload);
         }
@@ -756,7 +752,7 @@ public function programar(
             ->route('campanias.show', $campania->id)
             ->with('success', 'Campaña programada correctamente.');
 
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return redirect()
             ->back()
             ->withErrors([
