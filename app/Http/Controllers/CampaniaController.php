@@ -730,9 +730,12 @@ public function programar(
     ];
 
     try {
+        //dd($campania->estado);
         if ($campania->estado === 'programada') {
+          //  dd("actualizar");
             $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
         } else {
+           //   dd("crear");
             $response = $mensajeriaService->crearCampania($payload);
         }
 
