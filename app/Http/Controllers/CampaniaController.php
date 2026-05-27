@@ -730,29 +730,13 @@ public function programar(
             ->format('Y-m-d\TH:i:s'),
     ];
 
-    try {
-
-        /*
-        |--------------------------------------------------------------------------
-        | SI YA EXISTE EN LA API -> ACTUALIZAR
-        |--------------------------------------------------------------------------
-        */
-
-        if ($campania->mensajeria_campaign_id) {
-
+   try {
+        if ($campania->estado === 'programada') {
             $response = $mensajeriaService->actualizarCampania(
-                $campania->mensajeria_campaign_id,
+                $campania->id,
                 $payload
             );
-
         } else {
-
-            /*
-            |--------------------------------------------------------------------------
-            | SI NO EXISTE -> CREAR
-            |--------------------------------------------------------------------------
-            */
-
             $response = $mensajeriaService->crearCampania($payload);
         }
 
@@ -760,24 +744,8 @@ public function programar(
             return redirect()
                 ->back()
                 ->withErrors([
-                    'general' =>
-                        'No se pudo programar la campaña en la API de mensajería. '
-                        . $response->body()
+                    'general' => 'No se pudo programar la campaña en la API de mensajería. ' . $response->body()
                 ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | GUARDAR ID EXTERNO SI ES NUEVA
-        |--------------------------------------------------------------------------
-        */
-
-        if (!$campania->mensajeria_campaign_id) {
-
-            $data = $response->json();
-
-            $campania->mensajeria_campaign_id =
-                $data['id'] ?? null;
         }
 
         $campania->fecha_programada = $request->fecha_programada;
@@ -789,13 +757,10 @@ public function programar(
             ->with('success', 'Campaña programada correctamente.');
 
     } catch (\Exception $e) {
-
         return redirect()
             ->back()
             ->withErrors([
-                'general' =>
-                    'Error al conectar con la API de mensajería: '
-                    . $e->getMessage()
+                'general' => 'Error al conectar con la API de mensajería: ' . $e->getMessage()
             ]);
     }
 }
