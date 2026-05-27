@@ -606,7 +606,7 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
        if ($request->segmentacion_tipo === 'filtros') {
             $segmentacion = $this->resolverSegmentacion($request,$mensajeriaService);
 
-            $campania->segmentacion_sql = $segmentacion['sql'];
+            $campania->segmentacion_sql = trim($segmentacion['sql']);
             $campania->cantidad_destinatarios = $segmentacion['cantidad'];
         } else {
             $debeResolverSegmentacion = !$campania->exists
@@ -616,10 +616,10 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
             if ($debeResolverSegmentacion) {
                 $segmentacion = $this->resolverSegmentacion($request,$mensajeriaService);
 
-                $campania->segmentacion_sql = $segmentacion['sql'];
+                $campania->segmentacion_sql = trim($segmentacion['sql']);
                 $campania->cantidad_destinatarios = $segmentacion['cantidad'];
             } else {
-                $campania->segmentacion_sql = $request->segmentacion_sql;
+                $campania->segmentacion_sql = trim($request->segmentacion_sql);
             }
         }
         $campania->mensaje = $request->mensaje;
@@ -711,7 +711,7 @@ public function programar(
         'fecha_programada.after' => 'La fecha de programación debe ser futura.',
     ]);
 
-    $sqlQuery = $campania->segmentacion_sql;
+    $sqlQuery = trim($campania->segmentacion_sql);
 
     if (!$sqlQuery) {
         return redirect()
