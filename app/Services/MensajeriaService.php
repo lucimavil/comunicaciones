@@ -55,10 +55,7 @@ class MensajeriaService
          return $this->http()->get($this->baseUrl . "/campaigns/{$campaignId}");
     }
 
-    public function obtenerJobsProgramados()
-    {
-         return $this->http()->get($this->baseUrl . '/scheduled-jobs');
-    }
+   
    public function obtenerDetalleMensajes($campaniaId)
 {
     $response = Http::withOptions([

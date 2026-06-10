@@ -16,13 +16,15 @@ use App\Services\MensajeriaService;
 class CampaniaController extends Controller
 {
    public function __construct()
-{
-    $this->baseUrl = config('services.mensajeria.url')
-        ?? env('MENSAJERIA_API_URL')
-        ?? 'https://hrc-mensajeria.sanluis.gob.ar:8081';
-}
+    {
+        $this->baseUrl = config('services.mensajeria.url')
+            ?? env('MENSAJERIA_API_URL')
+            ?? 'https://hrc-mensajeria.sanluis.gob.ar:8081';
+    }
     public function index(MensajeriaService $mensajeriaService)
     {
+        $this->sincronizarCampaniasConMensajeria($mensajeriaService);
+
         $campaniasActivas = Campania::whereIn('estado', ['borrador', 'programada'])
             ->count();
 
@@ -78,7 +80,39 @@ class CampaniaController extends Controller
             'resumenMensajeria'
         ));
     }
+private function sincronizarCampaniasConMensajeria(MensajeriaService $mensajeriaService): void
+{
+    $campanias = Campania::whereIn('estado', ['programada', 'ejecutando'])
+        ->where('fecha_programada', '<=', now())
+        ->get();
 
+    foreach ($campanias as $campania) {
+        try {
+            $response = $mensajeriaService->obtenerCampania($campania->id);
+
+            if (!$response->successful()) {
+                continue;
+            }
+
+            $data = $response->json();
+            $status = $data['status'] ?? null;
+
+            if ($status === 'SENT') {
+                $campania->update([
+                    'estado' => 'finalizada',
+                    'fecha_finalizacion' => now(),
+                ]);
+                continue;
+            }
+
+        } catch (\Throwable $e) {
+            \Log::error('Error sincronizando campaña con mensajería', [
+                'campania_id' => $campania->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+}
     public function create()
     {
         $usuarios = User::all();
