@@ -70,7 +70,7 @@
                             <span class="badge rounded-pill text-bg-light">Últimos 30 días</span>
                         </div>
                         <div class="chart-placeholder">
-                            Montar Chart.js / ApexCharts con métricas de campaña
+                           <div id="graficoGeneralEstados" style="height:320px;"></div>
                         </div>
                     </div>
                 </div>
@@ -188,6 +188,12 @@
                              <a href="{{ route('campanias.show', $campania->id) }}" class="btn btn-sm btn-light border">
                                     <i class="bi bi-eye"></i>
                                 </a>
+                                @if($campania->estado === 'finalizada')
+                                    <a href="{{ route('campanias.dashboard', $campania->id) }}"
+                                    class="btn btn-sm btn-outline-primary">
+                                        Ver dashboard
+                                    </a>
+                                @endif
                         </td>
                     </tr>
                   <div class="modal fade"
@@ -240,6 +246,54 @@
         </table>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const el = document.querySelector("#graficoGeneralEstados");
+
+    console.log('Elemento grafico:', el);
+
+    if (!el) {
+        console.log('No existe #graficoGeneralEstados');
+        return;
+    }
+
+    const series = [
+        {{ (int) ($resumenMensajeria['aceptadas_meta'] ?? 0) }},
+        {{ (int) ($resumenMensajeria['enviados'] ?? 0) }},
+        {{ (int) ($resumenMensajeria['recibidos'] ?? 0) }},
+        {{ (int) ($resumenMensajeria['leidos'] ?? 0) }},
+        {{ (int) ($resumenMensajeria['fallos'] ?? 0) }}
+    ];
+
+    console.log('Series:', series);
+
+    const options = {
+        chart: {
+            type: 'donut',
+            height: 320
+        },
+        series: series,
+        labels: [
+            'Aceptados por Meta',
+            'Enviados',
+            'Recibidos',
+            'Leídos',
+            'Fallos'
+        ],
+        legend: {
+            position: 'bottom'
+        },
+        noData: {
+            text: 'Sin datos disponibles'
+        }
+    };
+
+    new ApexCharts(el, options).render();
+});
+</script>
 @if($errors->has('general'))
 <div class="modal fade" id="modalMensajeCampania" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

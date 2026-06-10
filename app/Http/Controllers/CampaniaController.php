@@ -21,10 +21,10 @@ class CampaniaController extends Controller
         ?? env('MENSAJERIA_API_URL')
         ?? 'https://hrc-mensajeria.sanluis.gob.ar:8081';
 }
-    public function index()
+    public function index(MensajeriaService $mensajeriaService)
     {
         $campaniasActivas = Campania::whereIn('estado', ['borrador', 'programada'])
-        ->count();
+            ->count();
 
         $campaniasProgramadas = Campania::where('estado', 'programada')
             ->count();
@@ -39,29 +39,35 @@ class CampaniaController extends Controller
             'fallos' => 0,
         ];
 
-        try {
-            $response = Http::timeout(10)
-                ->get(config('services.mensajeria.url') . '/estadisticas/resumen');
+        $campaniasConMensajeria = Campania::whereNotNull('mensajeria_campaign_id')
+            ->get();
 
-            if ($response->successful()) {
-                $data = $response->json();
+        foreach ($campaniasConMensajeria as $campania) {
+            try {
+                $stats = $mensajeriaService->obtenerEstadisticas(
+                    $campania->mensajeria_campaign_id
+                );
 
-                $resumenMensajeria = [
-                    'mensajes_enviados' => $data['mensajes_enviados'] ?? 0,
-                    'tasa_lectura' => $data['tasa_lectura'] ?? 0,
-                    'aceptadas_meta' => $data['aceptadas_meta'] ?? 0,
-                    'enviados' => $data['enviados'] ?? 0,
-                    'recibidos' => $data['recibidos'] ?? 0,
-                    'leidos' => $data['leidos'] ?? 0,
-                    'fallos' => $data['fallos'] ?? 0,
-                ];
+                $resumenMensajeria['mensajes_enviados'] += $stats['total'] ?? 0;
+                $resumenMensajeria['aceptadas_meta'] += $stats['accepted'] ?? 0;
+                $resumenMensajeria['enviados'] += $stats['sent'] ?? 0;
+                $resumenMensajeria['recibidos'] += $stats['received'] ?? 0;
+                $resumenMensajeria['leidos'] += $stats['read'] ?? 0;
+                $resumenMensajeria['fallos'] += $stats['failed'] ?? 0;
+
+            } catch (\Throwable $e) {
+                logger()->error('Error obteniendo estadísticas de campaña', [
+                    'campania_id' => $campania->id,
+                    'mensajeria_campaign_id' => $campania->mensajeria_campaign_id,
+                    'error' => $e->getMessage(),
+                ]);
             }
-        } catch (\Throwable $e) {
-            // opcional: loguear error
-            logger()->error('Error consultando API de mensajería', [
-                'error' => $e->getMessage(),
-            ]);
         }
+
+        $resumenMensajeria['tasa_lectura'] =
+            $resumenMensajeria['mensajes_enviados'] > 0
+                ? round(($resumenMensajeria['leidos'] / $resumenMensajeria['mensajes_enviados']) * 100, 2)
+                : 0;
 
         $campanias = Campania::latest()->paginate(10);
 
@@ -260,16 +266,110 @@ class CampaniaController extends Controller
             }
         }
     }
+public function dashboard(
+    Campania $campania,
+    MensajeriaService $mensajeriaService
+) {
+    $estadisticas = $mensajeriaService->obtenerEstadisticas(
+        $campania->mensajeria_campaign_id
+    );
 
-    public function dashboard()
-    {
-        $campanias = Campania::with('solicitante')
-            ->latest()
-            ->take(5)
-            ->get();
+    $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
+        $campania->mensajeria_campaign_id
+    );
 
-        return view('dashboard', compact('campanias'));
+    return view(
+        'campanias.dashboard',
+        compact('campania', 'estadisticas', 'detallePacientes')
+    );
+}
+  public function exportarDashboardExcel(
+    Campania $campania,
+    MensajeriaService $mensajeriaService
+) {
+    $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
+        $campania->mensajeria_campaign_id
+    );
+
+    $filename = 'dashboard_campania_' . $campania->id . '.xls';
+
+    $headers = [
+        'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+        'Content-Disposition' => "attachment; filename=\"$filename\"",
+        'Pragma' => 'no-cache',
+        'Expires' => '0',
+    ];
+
+    return response()->stream(function () use ($campania, $detallePacientes) {
+        echo "\xEF\xBB\xBF";
+
+        echo "<table border='1'>";
+        echo "<tr><th colspan='5'>Dashboard campaña: {$campania->nombre}</th></tr>";
+        echo "<tr>";
+        echo "<th>Nombre</th>";
+        echo "<th>Teléfono</th>";
+        echo "<th>Estado</th>";
+        echo "<th>Leído</th>";
+        echo "<th>Confirmado</th>";
+        echo "</tr>";
+
+        foreach ($detallePacientes as $paciente) {
+            $leido = ($paciente['leido'] ?? null) === null
+                ? '-'
+                : (($paciente['leido']) ? 'Sí' : 'No');
+
+            $confirmado = ($paciente['confirmado'] ?? null) === null
+                ? '-'
+                : (($paciente['confirmado']) ? 'Sí' : 'No');
+
+            echo "<tr>";
+            echo "<td>" . e($paciente['nombre'] ?? '-') . "</td>";
+            echo "<td>" . e($paciente['telefono'] ?? '-') . "</td>";
+            echo "<td>" . e($paciente['estado'] ?? '-') . "</td>";
+            echo "<td>" . e($leido) . "</td>";
+            echo "<td>" . e($confirmado) . "</td>";
+            echo "</tr>";
+        }
+
+        echo "</table>";
+    }, 200, $headers);
+}
+    /*  public function dashboard(
+    Campania $campania,
+    MensajeriaService $mensajeriaService
+) {
+    if ($campania->estado !== 'finalizada') {
+        return redirect()
+            ->route('campanias.index')
+            ->withErrors([
+                'general' => 'Solo se puede ver el dashboard de campañas finalizadas.'
+            ]);
     }
+
+    if (!$campania->mensajeria_campaign_id) {
+        return redirect()
+            ->route('campanias.index')
+            ->withErrors([
+                'general' => 'La campaña no tiene ID asociado en Mensajería.'
+            ]);
+    }
+
+    $response = $mensajeriaService->obtenerEstadisticas(
+        $campania->mensajeria_campaign_id
+    );
+
+    if (!$response->successful()) {
+        return redirect()
+            ->route('campanias.index')
+            ->withErrors([
+                'general' => 'No se pudieron obtener las estadísticas de Mensajería.'
+            ]);
+    }
+
+    $estadisticas = $response->json();
+
+    return view('campanias.dashboard', compact('campania', 'estadisticas'));
+}*/
 protected function resolverSegmentacion(Request $request,MensajeriaService $mensajeriaService): array
 {
     if ($request->segmentacion_tipo === 'sql') {
@@ -655,7 +755,17 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
                 'message' => $campania->mensaje,
                 'scheduledAt' => Carbon::parse($campania->fecha_programada)->format('Y-m-d\TH:i:s'),
             ];
+            if ($campania->adjunto_path) {
+                $mime = $campania->adjunto_tipo_mime;
 
+                $payload['tipo'] = str_starts_with($mime, 'image/')
+                    ? 'image'
+                    : 'document';
+
+                $payload['caption'] = $campania->mensaje;
+                $payload['nombreArchivo'] = $campania->adjunto_nombre;
+                $payload['urlArchivo'] = asset('storage/' . $campania->adjunto_path);
+            }
             $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
 
             if (!$response->successful()) {
@@ -723,19 +833,30 @@ public function programar(
     }
 
     $payload = [
-        'campaignId' => $campania->id,
+        'campaignId' => $campania->mensajeria_campaign_id ?? $campania->id,
         'sqlQuery' => $sqlQuery,
         'message' => $campania->mensaje,
         'scheduledAt' => Carbon::parse($request->fecha_programada)->format('Y-m-d\TH:i:s'),
     ];
+    if ($campania->adjunto_path) {
+        $mime = $campania->adjunto_tipo_mime;
+
+        $payload['tipo'] = str_starts_with($mime, 'image/')
+            ? 'image'
+            : 'document';
+
+        $payload['caption'] = $campania->mensaje;
+        $payload['nombreArchivo'] = $campania->adjunto_nombre;
+        $payload['urlArchivo'] = asset('storage/' . $campania->adjunto_path);
+    }
 
     try {
-        //dd($campania->estado);
-        if ($campania->estado === 'programada') {
-          //  dd("actualizar");
-            $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
+        if ($campania->estado === 'programada' && $campania->mensajeria_campaign_id) {
+            $response = $mensajeriaService->actualizarCampania(
+                $campania->mensajeria_campaign_id,
+                $payload
+            );
         } else {
-           //   dd("crear");
             $response = $mensajeriaService->crearCampania($payload);
         }
 
@@ -747,8 +868,19 @@ public function programar(
                 ]);
         }
 
+        $data = $response->json();
+
+        $mensajeriaCampaignId =
+            $data['id']
+            ?? $data['campaignId']
+            ?? $data['campaign_id']
+            ?? $data['data']['id']
+            ?? $data['data']['campaignId']
+            ?? $campania->mensajeria_campaign_id;
+
         $campania->fecha_programada = $request->fecha_programada;
         $campania->estado = 'programada';
+        $campania->mensajeria_campaign_id = $mensajeriaCampaignId;
         $campania->save();
 
         return redirect()
@@ -776,10 +908,6 @@ public function programar(
     return view('campanias.create', compact('campania'));
 }
 
-    public function update(Request $request, Campania $campania)
-    {
-        //
-    }
   public function destroy(
         Campania $campania,
         MensajeriaService $mensajeriaService
@@ -822,5 +950,7 @@ public function programar(
             ->route('campanias.index')
             ->with('success', 'Campaña eliminada correctamente.');
     }
+
+    
     
 }

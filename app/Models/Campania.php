@@ -44,6 +44,8 @@ class Campania extends Model
         'fecha_programada',
         'fecha_inicio',
         'fecha_fin',
+        // mensajeria id
+         'mensajeria_campaign_id',
     ];
 
     protected $casts = [

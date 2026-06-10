@@ -51,12 +51,12 @@ Route::middleware(['auth'])->group(function () {
  
     Route::delete('/campanias/{campania}', [CampaniaController::class, 'destroy'])
     ->name('campanias.destroy');
+    
+    Route::get('/campanias/{campania}/dashboard', [CampaniaController::class, 'dashboard'])
+        ->name('campanias.dashboard');
+    });
 
-    // MODULO ENCUESTAS
-    //MODULO MENSAJERIA
-    //MODULO  INTERCONSULTAS
-});
-
-
+Route::get('/campanias/{campania}/dashboard/excel', [CampaniaController::class, 'exportarDashboardExcel'])
+    ->name('campanias.dashboard.excel');
 
 require __DIR__.'/auth.php';
