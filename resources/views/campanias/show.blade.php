@@ -136,7 +136,7 @@ USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * $costoPorMensaje
             </div>
         @endif
     </div>
-@endif
+@endif 
 <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
         <h6 class="fw-bold mb-3">Programación</h6>

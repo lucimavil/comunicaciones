@@ -113,6 +113,7 @@
         <table class="table align-middle mb-0">
             <thead>
                 <tr>
+                     <th>Id</th>
                     <th>Campaña</th>
                     <th>Solicitante</th>
                     <th>Fecha Creación</th>
@@ -125,6 +126,9 @@
             <tbody>
                 @forelse($campanias as $campania)
                     <tr>
+                        <td>
+                            <div class="fw-semibold">{{ $campania->id }}</div>
+                        </td>
                         <td>
                             <div class="fw-semibold">{{ $campania->titulo }}</div>
                             <div class="small text-secondary">
