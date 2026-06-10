@@ -27,9 +27,9 @@ class VerificarCampaniasEjecutando extends Command
         $this->info("Consultando campaña {$campania->id}");
 
         try {
-
+            $this->info("Consultando campaña {$campania->id}");
             $response = $mensajeriaService
-                ->obtenerCampania($campania->mensajeria_campaign_id);
+                ->obtenerCampania($campania->id);
 
             if (!$response->successful()) {
                 $this->error("Error consultando campaña {$campania->id}");
