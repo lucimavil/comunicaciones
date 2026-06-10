@@ -870,13 +870,15 @@ public function programar(
 
         $data = $response->json();
 
-        $mensajeriaCampaignId =
-            $data['id']
-            ?? $data['campaignId']
-            ?? $data['campaign_id']
-            ?? $data['data']['id']
-            ?? $data['data']['campaignId']
-            ?? $campania->mensajeria_campaign_id;
+      $mensajeriaCampaignId =
+        $data['messageCampaignId']
+        ?? $data['id']
+        ?? $data['campaignId']
+        ?? $data['campaign_id']
+        ?? $data['data']['messageCampaignId']
+        ?? $data['data']['id']
+        ?? $data['data']['campaignId']
+        ?? $campania->mensajeria_campaign_id;
 
         $campania->fecha_programada = $request->fecha_programada;
         $campania->estado = 'programada';

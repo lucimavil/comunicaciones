@@ -90,30 +90,35 @@ USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * $costoPorMensaje
             {{ $campania->mensaje }}
         </div>
     </div>
-   @if(!empty($campania->adjunto_path))
+@if(!empty($campania->adjunto_path))
+    @php
+        $mime = $campania->adjunto_tipo_mime ?? '';
+        $urlAdjunto = asset('storage/' . $campania->adjunto_path);
+    @endphp
+
     <div class="mt-3">
         <label class="form-label fw-bold">Archivo adjunto</label>
 
-        @if(str_starts_with($campania->adjunto_tipo_mime, 'image/'))
+        @if(str_starts_with($mime, 'image/'))
             <div class="border rounded p-2 bg-light">
                 <img 
-                    src="{{ asset('storage/' . $campania->adjunto_path) }}" 
+                    src="{{ $urlAdjunto }}" 
                     class="img-fluid rounded"
                     style="max-height: 250px;"
                 >
             </div>
 
-        @elseif($campania->adjunto_tipo_mime === 'application/pdf')
+        @elseif($mime === 'application/pdf')
             <div class="border rounded bg-light p-2">
                 <iframe
-                    src="{{ asset('storage/' . $campania->adjunto_path) }}"
+                    src="{{ $urlAdjunto }}"
                     width="100%"
                     height="500"
                     class="border rounded">
                 </iframe>
             </div>
 
-            <a href="{{ asset('storage/' . $campania->adjunto_path) }}"
+            <a href="{{ $urlAdjunto }}"
                target="_blank"
                class="btn btn-sm btn-primary mt-2">
                 Abrir PDF
@@ -121,9 +126,9 @@ USD {{ number_format(($campania->cantidad_destinatarios ?? 0) * $costoPorMensaje
 
         @else
             <div class="border rounded p-3 bg-light d-flex justify-content-between align-items-center">
-                <span>{{ $campania->adjunto_nombre }}</span>
+                <span>{{ $campania->adjunto_nombre ?? 'Archivo adjunto' }}</span>
 
-                <a href="{{ asset('storage/' . $campania->adjunto_path) }}"
+                <a href="{{ $urlAdjunto }}"
                    target="_blank"
                    class="btn btn-sm btn-primary">
                     Ver archivo
