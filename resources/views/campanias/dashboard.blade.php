@@ -437,6 +437,7 @@
     <thead>
         <tr>
             <th>Paciente</th>
+            <th>Teléfono</th>
             <th>Estado</th>
             <th>Fecha envío</th>
             <th>Fecha lectura</th>
@@ -463,7 +464,7 @@
                     </small>
                 @endif
             </td>
-
+            <td>{{ $paciente['telefono'] ?? '-' }}</td>
             <td>
 
                 @php

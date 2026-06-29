@@ -304,12 +304,14 @@ public function dashboard(
     Campania $campania,
     MensajeriaService $mensajeriaService
 ) {
+    $campaniaMensajeriaId = $campania->mensajeria_campaign_id ?? $campania->id;
+
     $estadisticas = $mensajeriaService->obtenerEstadisticas(
-        $campania->id
+       $campaniaMensajeriaId
     );
 
     $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
-        $campania->id
+       $campaniaMensajeriaId
     );
 
     return view(
@@ -321,11 +323,13 @@ public function dashboard(
     Campania $campania,
     MensajeriaService $mensajeriaService
 ) {
+    $campaniaMensajeriaId = $campania->mensajeria_campaign_id ?? $campania->id;
+
     $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
-        $campania->mensajeria_campaign_id
+        $campaniaMensajeriaId
     );
 
-    $filename = 'dashboard_campania_' . $campania->id . '.xls';
+    $filename = 'dashboard_campania_' . $campaniaMensajeriaId . '.xls';
 
     $headers = [
         'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
@@ -340,30 +344,30 @@ public function dashboard(
         echo "<table border='1'>";
         echo "<tr><th colspan='5'>Dashboard campaña: {$campania->nombre}</th></tr>";
         echo "<tr>";
-        echo "<th>Nombre</th>";
+        echo "<th>Paciente</th>";
         echo "<th>Teléfono</th>";
         echo "<th>Estado</th>";
-        echo "<th>Leído</th>";
-        echo "<th>Confirmado</th>";
+        echo "<th>Fecha envío</th>";
+        echo "<th>Fecha lectura</th>";
         echo "</tr>";
 
         foreach ($detallePacientes as $paciente) {
-            $leido = ($paciente['leido'] ?? null) === null
-                ? '-'
-                : (($paciente['leido']) ? 'Sí' : 'No');
+    $fechaEnvio = !empty($paciente['fecha_envio'])
+        ? \Carbon\Carbon::parse($paciente['fecha_envio'])->format('d/m/Y H:i')
+        : '-';
 
-            $confirmado = ($paciente['confirmado'] ?? null) === null
-                ? '-'
-                : (($paciente['confirmado']) ? 'Sí' : 'No');
+    $fechaLectura = !empty($paciente['fecha_leido'])
+        ? \Carbon\Carbon::parse($paciente['fecha_leido'])->format('d/m/Y H:i')
+        : '-';
 
-            echo "<tr>";
-            echo "<td>" . e($paciente['nombre'] ?? '-') . "</td>";
-            echo "<td>" . e($paciente['telefono'] ?? '-') . "</td>";
-            echo "<td>" . e($paciente['estado'] ?? '-') . "</td>";
-            echo "<td>" . e($leido) . "</td>";
-            echo "<td>" . e($confirmado) . "</td>";
-            echo "</tr>";
-        }
+    echo "<tr>";
+    echo "<td>" . e($paciente['nombre'] ?? '-') . "</td>";
+    echo "<td>" . e($paciente['telefono'] ?? '-') . "</td>";
+    echo "<td>" . e($paciente['estado'] ?? '-') . "</td>";
+    echo "<td>" . e($fechaEnvio) . "</td>";
+    echo "<td>" . e($fechaLectura) . "</td>";
+    echo "</tr>";
+}
 
         echo "</table>";
     }, 200, $headers);
@@ -695,7 +699,15 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
         'mensaje' => 'nullable|string',
         'adjunto' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240',
     ]);
+    if ($request->hasFile('adjunto')) {
+        $nombreOriginal = $request->file('adjunto')->getClientOriginalName();
 
+        if (preg_match('/\s/', $nombreOriginal)) {
+            throw ValidationException::withMessages([
+                'adjunto' => ['El nombre del archivo adjunto no puede contener espacios. Renombralo antes de subirlo.']
+            ]);
+        }
+    }
     if (
         $request->filled('edad_min') &&
         $request->filled('edad_max') &&
@@ -800,7 +812,7 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
                 $payload['nombreArchivo'] = $campania->adjunto_nombre;
                 $payload['urlArchivo'] = asset('storage/' . $campania->adjunto_path);
             }
-            $response = $mensajeriaService->actualizarCampania($campania->id, $payload);
+            $response = $mensajeriaService->actualizarCampania( $campania->mensajeria_campaign_id ?? $campania->id,$payload);
 
             if (!$response->successful()) {
                 throw new \Exception(

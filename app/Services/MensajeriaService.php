@@ -93,6 +93,7 @@ class MensajeriaService
        return [
     'nombre' => $mensaje['NOMBRE_PERSONA'],
     'codigo_persona' => $mensaje['CODIGO_PERSONA'],
+    'telefono' => $mensaje['PHONE_NUMBER'] ?? '-',
     'estado' => $estadoTexto,
     'fecha_envio' => $mensaje['FECHA_ENVIO'],
     'fecha_leido' => $mensaje['FECHA_LEIDO'],

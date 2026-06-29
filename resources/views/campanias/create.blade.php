@@ -369,14 +369,29 @@ La consulta debe traer campos con esos alias">
     @change="
         adjuntoFile = $event.target.files[0];
 
-        if (adjuntoFile) {
-            adjuntoPreview = URL.createObjectURL(adjuntoFile);
+       if (adjuntoFile) {
+        if (/\s/.test(adjuntoFile.name)) {
+            $event.target.value = '';
+            adjuntoFile = null;
+            adjuntoPreview = '';
+            mostrarModal(
+                'Nombre de archivo inválido',
+                'El nombre del archivo no puede tener espacios. Renombralo y volvé a adjuntarlo.',
+                'warning'
+            );
+            return;
         }
+
+        adjuntoPreview = URL.createObjectURL(adjuntoFile);
+        adjunto_path = '';
+        adjunto_nombre = adjuntoFile.name;
+        adjunto_tipo_mime = adjuntoFile.type;
+    }
     "
 >
     <small class="text-muted">Permitidos: JPG, PNG, PDF, DOC, DOCX. Máx 10MB.</small>
 </div>
-<div x-show="adjunto_path" class="mt-3">
+<div x-show="!adjuntoFile && adjunto_path" class="mt-3">
     <label class="form-label fw-bold">Adjunto actual</label>
 
     <template x-if="adjunto_tipo_mime && adjunto_tipo_mime.startsWith('image/')">
@@ -583,7 +598,7 @@ La consulta debe traer campos con esos alias">
         </div>
 
         <div class="fw-semibold">
-            <span x-text="fecha_programada"></span>
+           <span x-text="formatearFechaProgramada(fecha_programada)"></span>
         </div>
     </div>
                 </div>
@@ -762,6 +777,7 @@ function wizardCampania(campania = null) {
         loadingSegmentacion: false,
         loadingGuardar: false,
 
+        
         get modalTipoClase() {
             if (this.modalTipo === 'error') return 'bg-danger text-white';
             if (this.modalTipo === 'success') return 'bg-success text-white';
@@ -794,6 +810,7 @@ function wizardCampania(campania = null) {
             this.alcance = 0;
             this.advertencia_segmentacion = '';
         },
+       
         async siguiente() {
             this.errores = {};
 
@@ -1124,6 +1141,15 @@ function wizardCampania(campania = null) {
         calcularCosto() {
             let total = (this.alcance || 0) * 0.02;
             return total.toFixed(2);
+        },
+         formatearFechaProgramada(valor) {
+            if (!valor) return '-';
+
+            const [fecha, hora] = valor.split('T');
+            if (!fecha || !hora) return valor;
+
+            const [anio, mes, dia] = fecha.split('-');
+            return `${dia}/${mes}/${anio} - ${hora}`;
         },
     async guardarBorrador() {
     if (this.loadingGuardar) return;
