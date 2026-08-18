@@ -20,15 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', function () {
         return view('home');
     })->name('home');
-    // MODULO COMUNICACIONES
-    Route::prefix('comunicaciones')->group(function () {
-
-        Route::get('/', function () {
-            return view('comunicaciones.index');
-        })->name('comunicaciones.index');
-
-        Route::resource('campanias', CampaniaController::class);
-    });
+   
     // MODULO CAMPAÑA
     Route::resource('campanias', CampaniaController::class);
     Route::get('/campanias/{id}', [CampaniaController::class, 'show'])->name('campanias.show');
@@ -54,9 +46,44 @@ Route::middleware(['auth'])->group(function () {
     
     Route::get('/campanias/{campania}/dashboard', [CampaniaController::class, 'dashboard'])
         ->name('campanias.dashboard');
-    });
+   
 
-Route::get('/campanias/{campania}/dashboard/excel', [CampaniaController::class, 'exportarDashboardExcel'])
-    ->name('campanias.dashboard.excel');
+    Route::get('/campanias/{campania}/dashboard/excel', [CampaniaController::class, 'exportarDashboardExcel'])
+        ->name('campanias.dashboard.excel');
+
+    // MODULO COMUNICACIONES
+     Route::resource('comunicacion', ComunicacionController::class);
+    Route::get('/comunicacion/{id}', [ComunicacionController::class, 'show'])->name('comunicacion.show');
+
+  
+    Route::patch('/comunicacion/{comunicacion}/programar', [ComunicacionController::class, 'programar'])
+    ->name('comunicacion.programar');
+    
+    Route::get('/comunicacion', [ComunicacionController::class, 'index'])->name('comunicacion.index');
+    Route::get('/comunicacion/create', [ComunicacionController::class, 'create'])->name('comunicacion.create');
+    Route::post('/comunicacion', [ComunicacionController::class, 'store'])->name('comunicacion.store');
+
+    Route::post('/comunicacion/probar-segmentacion', [ComunicacionController::class, 'probarSegmentacion'])
+        ->name('comunicacion.probar-segmentacion');
+    
+        Route::post('/comunicacion/guardar-borrador', [ComunicacionController::class, 'guardarBorrador'])
+    ->name('comunicacion.guardar-borrador');
+
+    Route::get('/comunicacion/{id}/edit', [ComunicacionController::class, 'edit'])->name('comunicacion.edit');
+ 
+    Route::delete('/comunicacion/{comunicacion}', [ComunicacionController::class, 'destroy'])
+    ->name('comunicacion.destroy');
+    
+    Route::get('/comunicacion/{comunicacion}/dashboard', [ComunicacionController::class, 'dashboard'])
+        ->name('comunicacion.dashboard');
+   
+
+    Route::get('/comunicacion/{comunicacion}/dashboard/excel', [ComunicacionController::class, 'exportarDashboardExcel'])
+        ->name('comunicacion.dashboard.excel');
+
+ });
+    
+
+  
 
 require __DIR__.'/auth.php';

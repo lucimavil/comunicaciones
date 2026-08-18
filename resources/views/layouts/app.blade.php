@@ -177,6 +177,30 @@
             margin-bottom: 0;
             color: rgba(255,255,255,0.86);
         }
+         .hero-card-comunicaciones {
+            background: linear-gradient(135deg, rgba(18,59,103,0.95), rgba(40,167,169,0.90)),
+                        url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop') center/cover;
+            border-radius: 24px;
+            min-height: 220px;
+            color: #fff;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hero-card-comunicaciones h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: .25rem;
+        }
+
+        .hero-card-comunicaciones p {
+            margin-bottom: 0;
+            color: rgba(255,255,255,0.86);
+        }
+
 
         .info-alert {
             background: #fff7ed;
@@ -367,7 +391,7 @@
 
             <div class="nav-section-title">Comunicación</div>
            
-            <a href="#" class="nav-link">
+            <a  href="{{ route('comunicacion.index') }}"  class="nav-link">
                 <i class="bi bi-calendar-event"></i>
                 <span>Comunicación</span>
             </a>

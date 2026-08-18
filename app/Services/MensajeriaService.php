@@ -57,65 +57,65 @@ class MensajeriaService
 
    
    public function obtenerDetalleMensajes($campaniaId)
-{
-    $response = Http::withOptions([
-            'verify' => false,
-        ])
-        ->timeout(60)
-        ->get($this->baseUrl . '/mensajeria-data/mensajes-campania', [
-            'campania' => $campaniaId,
-        ]);
+    {
+        $response = Http::withOptions([
+                'verify' => false,
+            ])
+            ->timeout(60)
+            ->get($this->baseUrl . '/mensajeria-data/mensajes-campania', [
+                'campania' => $campaniaId,
+            ]);
 
-    if (!$response->successful()) {
-        return [];
+        if (!$response->successful()) {
+            return [];
+        }
+
+        $mensajes = $response->json() ?? [];
+
+        return collect($mensajes)->map(function ($mensaje) {
+            $estadoNumero = (int) ($mensaje['ESTADO'] ?? 0);
+
+            $estadoTexto = match ($estadoNumero) {
+                1 => 'Aceptado Meta',
+                2 => 'Enviado',
+                3 => 'Recibido',
+                4 => 'Leído',
+                5 => 'Confirmado',
+                6 => 'Cancelado por paciente',
+                7 => 'Cancelado por sistema',
+                8 => 'Revisar',
+                9 => 'Fallo',
+                10 => 'Eliminado',
+                11 => 'No aceptado Meta',
+                default => 'Pendiente',
+            };
+
+        return [
+        'nombre' => $mensaje['NOMBRE_PERSONA'],
+        'codigo_persona' => $mensaje['CODIGO_PERSONA'],
+        'telefono' => $mensaje['PHONE_NUMBER'] ?? '-',
+        'estado' => $estadoTexto,
+        'fecha_envio' => $mensaje['FECHA_ENVIO'],
+        'fecha_leido' => $mensaje['FECHA_LEIDO'],
+    ];
+        })->toArray();
     }
-
-    $mensajes = $response->json() ?? [];
-
-    return collect($mensajes)->map(function ($mensaje) {
-        $estadoNumero = (int) ($mensaje['ESTADO'] ?? 0);
-
-        $estadoTexto = match ($estadoNumero) {
-            1 => 'Aceptado Meta',
-            2 => 'Enviado',
-            3 => 'Recibido',
-            4 => 'Leído',
-            5 => 'Confirmado',
-            6 => 'Cancelado por paciente',
-            7 => 'Cancelado por sistema',
-            8 => 'Revisar',
-            9 => 'Fallo',
-            10 => 'Eliminado',
-            11 => 'No aceptado Meta',
-            default => 'Pendiente',
-        };
-
-       return [
-    'nombre' => $mensaje['NOMBRE_PERSONA'],
-    'codigo_persona' => $mensaje['CODIGO_PERSONA'],
-    'telefono' => $mensaje['PHONE_NUMBER'] ?? '-',
-    'estado' => $estadoTexto,
-    'fecha_envio' => $mensaje['FECHA_ENVIO'],
-    'fecha_leido' => $mensaje['FECHA_LEIDO'],
-];
-    })->toArray();
-}
     public function obtenerMensajesPorCampania($campaniaId)
-{
-    $response = Http::withOptions([
-            'verify' => false,
-        ])
-        ->timeout(60)
-        ->get($this->baseUrl . '/mensajeria-data/mensajes', [
-            'campania' => $campaniaId,
-        ]);
+    {
+        $response = Http::withOptions([
+                'verify' => false,
+            ])
+            ->timeout(60)
+            ->get($this->baseUrl . '/mensajeria-data/mensajes', [
+                'campania' => $campaniaId,
+            ]);
 
-    if (!$response->successful()) {
-        return [];
+        if (!$response->successful()) {
+            return [];
+        }
+
+        return $response->json() ?? [];
     }
-
-    return $response->json() ?? [];
-}
     public function obtenerEstadisticas($campaniaId)
     {
         $mensajes = $this->obtenerMensajesPorCampania($campaniaId);

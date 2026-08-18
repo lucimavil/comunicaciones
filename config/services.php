@@ -41,6 +41,9 @@ return [
     'mensajeria' => [
         'url' => env('MENSAJERIA_API_URL'),
     ],
+    'segmentacion_personal' => [
+    'url' => env('MENSAJERIA_API_URL'),
+],
 ],
 
 ];

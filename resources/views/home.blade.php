@@ -14,7 +14,7 @@
 
     <div class="row g-4">
 
-        <!-- COMUNICACIONES -->
+        <!-- campañas -->
         <div class="col-md-4">
             <a href="{{ route('campanias.index') }}" class="text-decoration-none">
                 <div class="card shadow-sm border-0 h-100">
@@ -27,9 +27,22 @@
                 </div>
             </a>
         </div>
+         <!-- Comunicación Interna -->
+        <div class="col-md-4">
+            <a href="{{ route('comunicacion.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-primary">Comunicación Interna</h5>
+                        <p class="text-muted">
+                            Gestión de comunicación interna.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
 
         <!-- OTROS MODULOS -->
-        @foreach(['Comunicacion Interna', 'Encuestas', 'Mensajeria','Interconsultas'] as $modulo)
+        @foreach(['Encuestas', 'Mensajeria','Interconsultas'] as $modulo)
         <div class="col-md-4">
             <div class="card bg-light border-0 h-100">
                 <div class="card-body">
