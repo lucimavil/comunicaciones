@@ -125,14 +125,21 @@
                             <div class="fw-semibold">{{ $comunicacion->id }}</div>
                         </td>
                         <td>
-                            <div class="fw-semibold">{{ $comunicacion->titulo }}</div>
+                            <div class="fw-semibold">{{ $comunicacion->nombre }}</div>
                             <div class="small text-secondary">
                                 {{ $comunicacion->descripcion }}
                             </div>
                         </td>
 
                         <td>
-                            {{ $comunicacion->solicitante ?? '-' }}
+                           {{ $comunicacion->solicitante
+    ? mb_convert_case(
+        str_replace('_', ' ', $comunicacion->solicitante),
+        MB_CASE_TITLE,
+        'UTF-8'
+    )
+    : '-'
+}}
                         </td>
 
                         <td>
@@ -210,7 +217,7 @@
 
             <div class="modal-body text-start">
                 ¿Estás segura de que querés eliminar la comunicación
-                <strong>{{ $comunicacion->titulo }}</strong>?
+                <strong>{{ $comunicacion->nombre }}</strong>?
             </div>
 
             <div class="modal-footer">

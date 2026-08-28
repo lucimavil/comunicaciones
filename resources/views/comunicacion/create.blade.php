@@ -492,11 +492,19 @@
             rows="12"
             x-model="segmentacion_sql"
             @input="marcarSegmentacionModificada()"
-            placeholder="SELECT ... FROM ..."
+            placeholder="SELECT
+    pf.cd_pessoa_fisica AS codigoPersona,
+    pf.nm_pessoa_fisica AS nombrePersona,
+    pf.nr_identidade AS dniPersona,
+    pf.nr_telefone_celular AS telefono
+FROM pessoa_fisica pf
+WHERE ..."
         ></textarea>
 
         <div class="form-text">
-            La consulta debe devolver los campos requeridos por la API de segmentación.
+              La consulta debe ser de tipo SELECT, contener FROM y WHERE,
+    y devolver los campos:
+    <strong>codigoPersona, nombrePersona, dniPersona y telefono</strong>.
         </div>
 
         <div
@@ -1482,16 +1490,20 @@ async probarSegmentacion() {
         const data = await response.json();
 
         if (!response.ok) {
-            this.mostrarModal(
-                'Error en segmentación',
-                data.message ??
-                    data.error_real ??
-                    'No se pudo probar la segmentación.',
-                'error'
-            );
 
-            return false;
-        }
+    console.error('Error segmentación:', data);
+
+    this.mostrarModal(
+        'Error en segmentación',
+        data.error_real ??
+        data.error_api ??
+        data.message ??
+        'No se pudo probar la segmentación.',
+        'error'
+    );
+
+    return false;
+}
 
         this.alcance = Number(data.cantidad ?? 0);
         this.sql_generada = data.sql_generada ?? '';

@@ -386,6 +386,56 @@ private function consultaSegmentosProfesionales(
         )
     ";
 }
+private function validarSqlManual(?string $sql): string
+{
+    $sql = trim((string) $sql);
+
+    if ($sql === '') {
+        throw new InvalidArgumentException(
+            'Debe ingresar una consulta SQL.'
+        );
+    }
+
+    if (!preg_match('/^\s*SELECT\b/i', $sql)) {
+        throw new InvalidArgumentException(
+            'La consulta SQL debe comenzar con SELECT.'
+        );
+    }
+
+    $operacionesProhibidas = [
+        'INSERT',
+        'UPDATE',
+        'DELETE',
+        'DROP',
+        'ALTER',
+        'TRUNCATE',
+        'MERGE',
+        'CREATE',
+        'GRANT',
+        'REVOKE'
+    ];
+
+    foreach ($operacionesProhibidas as $operacion) {
+        if (preg_match('/\b' . $operacion . '\b/i', $sql)) {
+            throw new InvalidArgumentException(
+                "La operación {$operacion} no está permitida."
+            );
+        }
+    }
+
+    $sqlSinPuntoFinal = rtrim(
+        $sql,
+        " \t\n\r\0\x0B;"
+    );
+
+    if (str_contains($sqlSinPuntoFinal, ';')) {
+        throw new InvalidArgumentException(
+            'Solo se permite una consulta SQL.'
+        );
+    }
+
+    return $sqlSinPuntoFinal;
+}
 private function consultaDirectivos(): string
 {
     return "

@@ -550,4 +550,76 @@ try {
         ]);
 }
 }
+
+public function destroy(
+    Comunicacion $comunicacion,
+    SegmentacionPersonalService $segmentacionService
+) {
+    try {
+
+        // Si ya fue programada, primero intentamos eliminarla
+        // también de la API de mensajería.
+        if ($comunicacion->estado === 'programada') {
+
+            $response = $segmentacionService
+                ->eliminarComunicacion($comunicacion->id);
+
+            if (!$response->successful()) {
+                return redirect()
+                    ->back()
+                    ->withErrors([
+                        'general' =>
+                            'No se pudo eliminar la comunicación de la API de mensajería. '
+                            . $response->body()
+                    ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Eliminar relaciones
+        |--------------------------------------------------------------------------
+        */
+
+        $comunicacion->segmentos()->detach();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Eliminar adjunto
+        |--------------------------------------------------------------------------
+        */
+
+        if ($comunicacion->adjunto_path) {
+            Storage::disk('public')
+                ->delete($comunicacion->adjunto_path);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Eliminar comunicación
+        |--------------------------------------------------------------------------
+        */
+
+        $comunicacion->delete();
+
+        return redirect()
+            ->route('comunicacion.index')
+            ->with(
+                'success',
+                'Comunicación eliminada correctamente.'
+            );
+
+    } catch (\Throwable $e) {
+
+        report($e);
+
+        return redirect()
+            ->back()
+            ->withErrors([
+                'general' =>
+                    'No se pudo eliminar la comunicación. '
+                    . $e->getMessage()
+            ]);
+    }
+}
 }
