@@ -551,6 +551,7 @@ try {
 }
 }
 
+
 public function destroy(
     Comunicacion $comunicacion,
     SegmentacionPersonalService $segmentacionService
