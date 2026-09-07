@@ -64,58 +64,12 @@ class SegmentacionPersonalService
         );
     }
    
-   public function obtenerDetalleMensajes($comunicacionId)
+    public function obtenerEnviosComunicacion(int $comunicacionId): array
     {
-        $response = Http::withOptions([
-                'verify' => false,
-            ])
+        $response = $this->http()
             ->timeout(60)
-            ->get($this->baseUrl . '/mensajeria-data/mensajes-campania', [
-                'campania' => $comunicacionId,
-            ]);
-
-        if (!$response->successful()) {
-            return [];
-        }
-
-        $mensajes = $response->json() ?? [];
-
-        return collect($mensajes)->map(function ($mensaje) {
-            $estadoNumero = (int) ($mensaje['ESTADO'] ?? 0);
-
-            $estadoTexto = match ($estadoNumero) {
-                1 => 'Aceptado Meta',
-                2 => 'Enviado',
-                3 => 'Recibido',
-                4 => 'Leído',
-                5 => 'Confirmado',
-                6 => 'Cancelado por paciente',
-                7 => 'Cancelado por sistema',
-                8 => 'Revisar',
-                9 => 'Fallo',
-                10 => 'Eliminado',
-                11 => 'No aceptado Meta',
-                default => 'Pendiente',
-            };
-
-        return [
-        'nombre' => $mensaje['NOMBRE_PERSONA'],
-        'codigo_persona' => $mensaje['CODIGO_PERSONA'],
-        'telefono' => $mensaje['PHONE_NUMBER'] ?? '-',
-        'estado' => $estadoTexto,
-        'fecha_envio' => $mensaje['FECHA_ENVIO'],
-        'fecha_leido' => $mensaje['FECHA_LEIDO'],
-    ];
-        })->toArray();
-    }
-    public function obtenerMensajesPorComunicacion($comunicacionId)
-    {
-        $response = Http::withOptions([
-                'verify' => false,
-            ])
-            ->timeout(60)
-            ->get($this->baseUrl . '/mensajeria-data/mensajes', [
-                'campania' => $comunicacionId,
+            ->get($this->baseUrl . '/mensajeria-data/envios', [
+                'ci' => $comunicacionId,
             ]);
 
         if (!$response->successful()) {
@@ -124,44 +78,107 @@ class SegmentacionPersonalService
 
         return $response->json() ?? [];
     }
-    public function obtenerEstadisticas($comunicacionId)
-{
-    $mensajes = $this->obtenerMensajesPorComunicacion($comunicacionId);
 
-    $totalMensajes = collect($mensajes)
-        ->filter(fn ($m) => !in_array((int) ($m['ESTADO'] ?? 0), [7, 8]))
-        ->count();
+    public function obtenerMensajesComunicacion(int $comunicacionId): array
+    {
+        $response = $this->http()
+            ->timeout(60)
+            ->get($this->baseUrl . '/mensajeria-data/mensajes', [
+                'ci' => $comunicacionId,
+            ]);
 
-    $aceptados = collect($mensajes)->where('ESTADO', 1)->count();
-    $enviados = collect($mensajes)->where('ESTADO', 2)->count();
-    $recibidos = collect($mensajes)->where('ESTADO', 3)->count();
-    $leidos = collect($mensajes)->where('ESTADO', 4)->count();
-    $confirmados = collect($mensajes)->where('ESTADO', 5)->count();
+        if (!$response->successful()) {
+            return [];
+        }
 
-    $cancelados = collect($mensajes)
-        ->filter(fn ($m) => in_array((int) ($m['ESTADO'] ?? 0), [6, 7]))
-        ->count();
+        return $response->json() ?? [];
+    }
 
-    $fallos = collect($mensajes)
-        ->filter(fn ($m) => in_array((int) ($m['ESTADO'] ?? 0), [9, 11]))
-        ->count();
+    public function obtenerDetalleComunicacion(int $comunicacionId): array
+    {
+        $response = $this->http()
+            ->timeout(60)
+            ->get($this->baseUrl . '/mensajeria-data/mensajes-ci', [
+                'ci' => $comunicacionId,
+            ]);
 
-    $tasaLectura = $totalMensajes > 0
-        ? round(($leidos / $totalMensajes) * 100, 2)
-        : 0;
+        if (!$response->successful()) {
+            return [];
+        }
 
-    return [
-        'total' => $totalMensajes,
-        'accepted' => $aceptados,
-        'sent' => $enviados,
-        'received' => $recibidos,
-        'read' => $leidos,
-        'confirmed' => $confirmados,
-        'cancelled' => $cancelados,
-        'failed' => $fallos,
-        'tasa_lectura' => $tasaLectura,
-    ];
-}
+        return $response->json() ?? [];
+    }
+
+    public function obtenerEstadisticasComunicacion(int $comunicacionId): array
+    {
+        $mensajes = collect(
+            $this->obtenerDetalleComunicacion($comunicacionId)
+        );
+
+        $total = $mensajes
+            ->filter(fn ($m) =>
+                !in_array(
+                    (int) ($m['ESTADO'] ?? 0),
+                    [7, 8, 10]
+                )
+            )
+            ->count();
+
+        $aceptados = $mensajes
+            ->filter(fn ($m) => (int) ($m['ESTADO'] ?? 0) === 1)
+            ->count();
+
+        $enviados = $mensajes
+            ->filter(fn ($m) => (int) ($m['ESTADO'] ?? 0) === 2)
+            ->count();
+
+        $recibidos = $mensajes
+            ->filter(fn ($m) => (int) ($m['ESTADO'] ?? 0) === 3)
+            ->count();
+
+        $leidos = $mensajes
+            ->filter(fn ($m) => (int) ($m['ESTADO'] ?? 0) === 4)
+            ->count();
+
+        $confirmados = $mensajes
+            ->filter(fn ($m) => (int) ($m['ESTADO'] ?? 0) === 5)
+            ->count();
+
+        $cancelados = $mensajes
+            ->filter(fn ($m) =>
+                in_array(
+                    (int) ($m['ESTADO'] ?? 0),
+                    [6, 7]
+                )
+            )
+            ->count();
+
+        $fallos = $mensajes
+            ->filter(fn ($m) =>
+                in_array(
+                    (int) ($m['ESTADO'] ?? 0),
+                    [9, 11]
+                )
+            )
+            ->count();
+
+        $tasaLectura = $total > 0
+            ? round(($leidos / $total) * 100, 2)
+            : 0;
+
+        return [
+            'total' => $total,
+            'accepted' => $aceptados,
+            'sent' => $enviados,
+            'received' => $recibidos,
+            'read' => $leidos,
+            'confirmed' => $confirmados,
+            'cancelled' => $cancelados,
+            'failed' => $fallos,
+            'tasa_lectura' => $tasaLectura,
+        ];
+    }
+
     public function resolverConsulta(
     string $tipo,
     array $segmentos = [],
@@ -190,7 +207,6 @@ private function consultaTodoPersonal(): string
         SELECT DISTINCT
             pf.cd_pessoa_fisica AS codigoPersona,
             pf.nm_pessoa_fisica AS nombrePersona,
-            pf.nr_identidade AS dniPersona,
             pf.nr_telefone_celular AS telefono
 
         FROM pessoa_fisica pf
@@ -317,7 +333,6 @@ private function consultaPorSegmentos(array $segmentosIds): string
         SELECT 
             resultado.codigoPersona AS codigoPersona,
             resultado.nombrePersona AS nombrePaciente,
-            resultado.dniPersona AS dniPaciente,
             resultado.telefono AS telefono
         FROM (
             {$union}
@@ -376,7 +391,6 @@ private function consultaSegmentosProfesionales(
         SELECT DISTINCT
             p.cd_pessoa_fisica AS codigoPersona,
             p.nm_pessoa_fisica AS nombrePersona,
-            p.nr_identidade AS dniPersona,
             p.nr_telefone_celular AS telefono
 
         FROM profesionales p
@@ -442,7 +456,6 @@ private function consultaDirectivos(): string
         SELECT DISTINCT
             pf.cd_pessoa_fisica AS codigoPersona,
             pf.nm_pessoa_fisica AS nombrePersona,
-            pf.nr_identidade AS dniPersona,
             pf.nr_telefone_celular AS telefono
 
         FROM pessoa_fisica pf

@@ -4,7 +4,9 @@
 
 <div class="container py-4">
 
+    {{-- CABECERA --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
+
         <div>
             <h2 class="fw-bold mb-1">
                 Dashboard de Comunicación
@@ -21,15 +23,18 @@
         >
             Volver al detalle
         </a>
+
     </div>
 
 
     {{-- KPIS --}}
     <div class="row g-3 mb-4">
 
+        {{-- TOTAL --}}
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
+
                     <div class="text-muted small mb-1">
                         Total mensajes
                     </div>
@@ -37,14 +42,71 @@
                     <div class="fs-2 fw-bold">
                         {{ number_format($total ?? 0, 0, ',', '.') }}
                     </div>
+
                 </div>
             </div>
         </div>
 
 
+        {{-- ACEPTADOS META --}}
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
+
+                    <div class="text-muted small mb-1">
+                        Aceptados por Meta
+                    </div>
+
+                    <div class="fs-2 fw-bold text-secondary">
+                        {{ number_format($aceptados ?? 0, 0, ',', '.') }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        {{-- ENVIADOS --}}
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="text-muted small mb-1">
+                        Enviados
+                    </div>
+
+                    <div class="fs-2 fw-bold text-primary">
+                        {{ number_format($enviados ?? 0, 0, ',', '.') }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        {{-- RECIBIDOS --}}
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="text-muted small mb-1">
+                        Recibidos
+                    </div>
+
+                    <div class="fs-2 fw-bold text-info">
+                        {{ number_format($recibidos ?? 0, 0, ',', '.') }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        {{-- LEIDOS --}}
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
                     <div class="text-muted small mb-1">
                         Leídos
                     </div>
@@ -53,40 +115,57 @@
                         {{ number_format($leidos ?? 0, 0, ',', '.') }}
                     </div>
 
-                    @php
-                        $porcentajeLeidos =
-                            ($total ?? 0) > 0
-                                ? (($leidos ?? 0) / $total) * 100
-                                : 0;
-                    @endphp
-
                     <div class="small text-muted mt-1">
-                        {{ number_format($porcentajeLeidos, 1, ',', '.') }}%
-                        del total
+                        {{ number_format($tasaLectura ?? 0, 1, ',', '.') }}%
+                        de lectura
                     </div>
+
                 </div>
             </div>
         </div>
 
 
+        {{-- CONFIRMADOS --}}
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
+
                     <div class="text-muted small mb-1">
-                        Enviados
+                        Confirmados
                     </div>
 
-                    <div class="fs-2 fw-bold text-primary">
-                        {{ number_format($enviados ?? 0, 0, ',', '.') }}
+                    <div class="fs-2 fw-bold text-success">
+                        {{ number_format($confirmados ?? 0, 0, ',', '.') }}
                     </div>
+
                 </div>
             </div>
         </div>
 
 
+        {{-- CANCELADOS --}}
         <div class="col-md-6 col-xl-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
+
+                    <div class="text-muted small mb-1">
+                        Cancelados
+                    </div>
+
+                    <div class="fs-2 fw-bold text-warning">
+                        {{ number_format($cancelados ?? 0, 0, ',', '.') }}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        {{-- FALLIDOS --}}
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
                     <div class="text-muted small mb-1">
                         Fallidos
                     </div>
@@ -94,6 +173,7 @@
                     <div class="fs-2 fw-bold text-danger">
                         {{ number_format($fallidos ?? 0, 0, ',', '.') }}
                     </div>
+
                 </div>
             </div>
         </div>
@@ -104,7 +184,9 @@
     {{-- GRAFICOS --}}
     <div class="row g-4 mb-4">
 
+        {{-- GRAFICO LECTURA --}}
         <div class="col-lg-6">
+
             <div class="card border-0 shadow-sm h-100">
 
                 <div class="card-body">
@@ -120,10 +202,13 @@
                 </div>
 
             </div>
+
         </div>
 
 
+        {{-- GRAFICO ESTADOS --}}
         <div class="col-lg-6">
+
             <div class="card border-0 shadow-sm h-100">
 
                 <div class="card-body">
@@ -139,24 +224,33 @@
                 </div>
 
             </div>
+
         </div>
 
     </div>
 
 
-    {{-- DETALLE DESTINATARIOS --}}
+    {{-- DETALLE DE DESTINATARIOS --}}
     <div class="card border-0 shadow-sm">
 
         <div class="card-body">
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div
+                class="d-flex justify-content-between align-items-center mb-4"
+            >
 
-                <h5 class="fw-bold mb-0">
-                    Detalle de destinatarios
-                </h5>
+                <div>
+                    <h5 class="fw-bold mb-1">
+                        Detalle de destinatarios
+                    </h5>
+
+                    <div class="small text-muted">
+                        Estado individual de los mensajes enviados.
+                    </div>
+                </div>
 
                 <span class="badge bg-secondary">
-                    {{ $com->destinatarios->count() }} destinatarios
+                    {{ count($detalle ?? []) }} destinatarios
                 </span>
 
             </div>
@@ -172,15 +266,15 @@
 
                             <th>Nombre</th>
 
-                            <th>Sector</th>
+                            <th>Código persona</th>
 
                             <th>Teléfono</th>
 
                             <th>Estado</th>
 
-                            <th>Respuesta</th>
+                            <th>Fecha envío</th>
 
-                            <th>Hora lectura</th>
+                            <th>Fecha lectura</th>
 
                         </tr>
 
@@ -189,96 +283,169 @@
 
                     <tbody>
 
-                        @forelse($com->destinatarios as $d)
+                    @forelse($detalle ?? [] as $d)
 
-                            <tr>
+                        @php
 
-                                <td class="fw-semibold">
-                                    {{ $d->user->name ?? '-' }}
-                                </td>
+                            $estadoNumero =
+                                (int) ($d['ESTADO'] ?? 0);
 
+                            $estadoTexto = match($estadoNumero) {
 
-                                <td>
-                                    {{ $d->user->sector ?? '-' }}
-                                </td>
+                                1 => 'Aceptado Meta',
 
+                                2 => 'Enviado',
 
-                                <td>
-                                    {{ $d->telefono ?? '-' }}
-                                </td>
+                                3 => 'Recibido',
 
+                                4 => 'Leído',
 
-                                <td>
+                                5 => 'Confirmado',
 
-                                    @php
-                                        $estado = strtolower(
-                                            $d->estado ?? ''
-                                        );
+                                6 => 'Cancelado por paciente',
 
-                                        $claseEstado = match($estado) {
-                                            'leido',
-                                            'leído' =>
-                                                'bg-success',
+                                7 => 'Cancelado por sistema',
 
-                                            'recibido' =>
-                                                'bg-info text-dark',
+                                8 => 'Revisar',
 
-                                            'enviado' =>
-                                                'bg-primary',
+                                9 => 'Fallo',
 
-                                            'fallo',
-                                            'fallido',
-                                            'noaceptadometa' =>
-                                                'bg-danger',
+                                10 => 'Eliminado',
 
-                                            'aceptadometa' =>
-                                                'bg-secondary',
+                                11 => 'No aceptado Meta',
 
-                                            default =>
-                                                'bg-light text-dark'
-                                        };
-                                    @endphp
-
-                                    <span class="badge {{ $claseEstado }}">
-                                        {{ ucfirst($d->estado ?? '-') }}
-                                    </span>
-
-                                </td>
+                                default => 'Pendiente',
+                            };
 
 
-                                <td>
-                                    {{ $d->respuesta ?: '-' }}
-                                </td>
+                            $claseEstado = match($estadoNumero) {
+
+                                1 =>
+                                    'bg-secondary',
+
+                                2 =>
+                                    'bg-primary',
+
+                                3 =>
+                                    'bg-info text-dark',
+
+                                4 =>
+                                    'bg-success',
+
+                                5 =>
+                                    'bg-success',
+
+                                6, 7 =>
+                                    'bg-warning text-dark',
+
+                                8 =>
+                                    'bg-warning text-dark',
+
+                                9, 11 =>
+                                    'bg-danger',
+
+                                10 =>
+                                    'bg-dark',
+
+                                default =>
+                                    'bg-light text-dark',
+                            };
+
+                        @endphp
 
 
-                                <td>
-                                    @if($d->leido_at)
+                        <tr>
 
-                                        {{ \Carbon\Carbon::parse($d->leido_at)->format('d/m/Y H:i') }}
+                            {{-- NOMBRE --}}
+                            <td class="fw-semibold">
 
-                                    @else
+                                {{ $d['NOMBRE_PERSONA'] ?? '-' }}
 
-                                        -
+                            </td>
 
-                                    @endif
-                                </td>
 
-                            </tr>
+                            {{-- CODIGO PERSONA --}}
+                            <td>
 
-                        @empty
+                                {{ $d['CODIGO_PERSONA'] ?? '-' }}
 
-                            <tr>
+                            </td>
 
-                                <td
-                                    colspan="6"
-                                    class="text-center text-muted py-4"
-                                >
-                                    No hay destinatarios registrados para esta comunicación.
-                                </td>
 
-                            </tr>
+                            {{-- TELEFONO --}}
+                            <td>
 
-                        @endforelse
+                                {{ $d['PHONE_NUMBER'] ?? '-' }}
+
+                            </td>
+
+
+                            {{-- ESTADO --}}
+                            <td>
+
+                                <span class="badge {{ $claseEstado }}">
+
+                                    {{ $estadoTexto }}
+
+                                </span>
+
+                            </td>
+
+
+                            {{-- FECHA ENVIO --}}
+                            <td>
+
+                                @if(!empty($d['FECHA_ENVIO']))
+
+                                    {{ \Carbon\Carbon::parse(
+                                        $d['FECHA_ENVIO']
+                                    )->format('d/m/Y H:i') }}
+
+                                @else
+
+                                    -
+
+                                @endif
+
+                            </td>
+
+
+                            {{-- FECHA LEIDO --}}
+                            <td>
+
+                                @if(!empty($d['FECHA_LEIDO']))
+
+                                    {{ \Carbon\Carbon::parse(
+                                        $d['FECHA_LEIDO']
+                                    )->format('d/m/Y H:i') }}
+
+                                @else
+
+                                    -
+
+                                @endif
+
+                            </td>
+
+                        </tr>
+
+
+                    @empty
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="text-center text-muted py-5"
+                            >
+
+                                No hay mensajes registrados para esta comunicación.
+
+                            </td>
+
+                        </tr>
+
+                    @endforelse
 
                     </tbody>
 
@@ -293,130 +460,181 @@
 </div>
 
 
+{{-- CHART JS --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
 <script>
+
 document.addEventListener('DOMContentLoaded', function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Lectura
+    | GRAFICO DE LECTURA
     |--------------------------------------------------------------------------
     */
 
     const lecturaCanvas =
         document.getElementById('lectura');
 
+
     if (lecturaCanvas) {
 
-        new Chart(lecturaCanvas, {
+        const total =
+            {{ (int) ($total ?? 0) }};
 
-            type: 'doughnut',
+        const leidos =
+            {{ (int) ($leidos ?? 0) }};
 
-            data: {
+        const noLeidos =
+            Math.max(
+                0,
+                total - leidos
+            );
 
-                labels: [
-                    'Leídos',
-                    'No leídos'
-                ],
 
-                datasets: [{
-                    data: [
-                        {{ (int) ($leidos ?? 0) }},
-                        {{ max(0, (int) ($total ?? 0) - (int) ($leidos ?? 0)) }}
+        new Chart(
+            lecturaCanvas,
+            {
+
+                type: 'doughnut',
+
+                data: {
+
+                    labels: [
+                        'Leídos',
+                        'No leídos'
+                    ],
+
+                    datasets: [
+                        {
+                            data: [
+                                leidos,
+                                noLeidos
+                            ]
+                        }
                     ]
-                }]
-            },
 
-            options: {
+                },
 
-                responsive: true,
+                options: {
 
-                maintainAspectRatio: false,
+                    responsive: true,
 
-                plugins: {
+                    maintainAspectRatio: false,
 
-                    legend: {
-                        position: 'bottom'
+                    plugins: {
+
+                        legend: {
+                            position: 'bottom'
+                        }
+
                     }
 
                 }
 
             }
-
-        });
+        );
 
     }
 
 
+
     /*
     |--------------------------------------------------------------------------
-    | Estados generales
+    | GRAFICO DE ESTADOS
     |--------------------------------------------------------------------------
     */
 
     const estadosCanvas =
         document.getElementById('estados');
 
+
     if (estadosCanvas) {
 
-        new Chart(estadosCanvas, {
+        new Chart(
+            estadosCanvas,
+            {
 
-            type: 'bar',
+                type: 'bar',
 
-            data: {
+                data: {
 
-                labels: [
-                    'Enviados',
-                    'Recibidos',
-                    'Leídos',
-                    'Fallidos'
-                ],
+                    labels: [
+                        'Aceptados',
+                        'Enviados',
+                        'Recibidos',
+                        'Leídos',
+                        'Confirmados',
+                        'Cancelados',
+                        'Fallidos'
+                    ],
 
-                datasets: [{
-                    label: 'Cantidad',
+                    datasets: [
+                        {
 
-                    data: [
-                        {{ (int) ($enviados ?? 0) }},
-                        {{ (int) ($recibidos ?? 0) }},
-                        {{ (int) ($leidos ?? 0) }},
-                        {{ (int) ($fallidos ?? 0) }}
-                    ]
-                }]
-            },
+                            label: 'Cantidad',
 
-            options: {
+                            data: [
 
-                responsive: true,
+                                {{ (int) ($aceptados ?? 0) }},
 
-                maintainAspectRatio: false,
+                                {{ (int) ($enviados ?? 0) }},
 
-                scales: {
+                                {{ (int) ($recibidos ?? 0) }},
 
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0
+                                {{ (int) ($leidos ?? 0) }},
+
+                                {{ (int) ($confirmados ?? 0) }},
+
+                                {{ (int) ($cancelados ?? 0) }},
+
+                                {{ (int) ($fallidos ?? 0) }}
+
+                            ]
+
                         }
-                    }
+                    ]
 
                 },
 
-                plugins: {
+                options: {
 
-                    legend: {
-                        display: false
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero: true,
+
+                            ticks: {
+                                precision: 0
+                            }
+
+                        }
+
+                    },
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        }
+
                     }
 
                 }
 
             }
-
-        });
+        );
 
     }
 
 });
+
 </script>
 
 @endsection

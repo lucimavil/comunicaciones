@@ -15,79 +15,106 @@ use App\Services\SegmentacionPersonalService;
 
 class ComunicacionController extends Controller
 {
-    public function index(SegmentacionPersonalService $segmentacionService)
-    {
-        $comunicacion = Comunicacion::with('responsable')->latest()->get();
+   public function index(
+    SegmentacionPersonalService $segmentacionService
+) {
+    $comunicacion = Comunicacion::with('responsable')
+        ->latest()
+        ->get();
 
-        /*$this->sincronizarComunicacionesConMensajeria($mensajeriaService);
+    $comunicacionActivas = Comunicacion::whereIn(
+        'estado',
+        ['borrador', 'programada']
+    )->count();
 
-        $comunicacionesActivas = Comunicaciones::whereIn('estado', ['borrador', 'programada'])
-            ->count();
+    $comunicacionProgramadas = Comunicacion::where(
+        'estado',
+        'programada'
+    )->count();
 
-        $comunicacionesProgramadas = Comunicaciones::where('estado', 'programada')
-            ->count();
+    $resumenMensajeria = [
+        'mensajes_enviados' => 0,
+        'tasa_lectura' => 0,
+        'aceptadas_meta' => 0,
+        'enviados' => 0,
+        'recibidos' => 0,
+        'leidos' => 0,
+        'confirmados' => 0,
+        'cancelados' => 0,
+        'fallos' => 0,
+    ];
 
-        $resumenMensajeria = [
-            'mensajes_enviados' => 0,
-            'tasa_lectura' => 0,
-            'aceptadas_meta' => 0,
-            'enviados' => 0,
-            'recibidos' => 0,
-            'leidos' => 0,
-            'fallos' => 0,
-        ];
+    $comunicacionesMensajeria = Comunicacion::whereIn(
+        'estado',
+        ['programada', 'finalizada']
+    )->get();
 
-        $comunicacionesConMensajeria = Comunicaciones::whereNotNull('mensajeria_campaign_id')
-            ->get();
+    foreach ($comunicacionesMensajeria as $item) {
+        try {
 
-        foreach ($comunicacionesConMensajeria as $campania) {
-            try {
-                $stats = $mensajeriaService->obtenerEstadisticas(
-                    $comunicaciones->id
+            $stats = $segmentacionService
+                ->obtenerEstadisticasComunicacion(
+                    $item->id
                 );
 
-                $resumenMensajeria['mensajes_enviados'] += $stats['total'] ?? 0;
-                $resumenMensajeria['aceptadas_meta'] += $stats['accepted'] ?? 0;
-                $resumenMensajeria['enviados'] += $stats['sent'] ?? 0;
-                $resumenMensajeria['recibidos'] += $stats['received'] ?? 0;
-                $resumenMensajeria['leidos'] += $stats['read'] ?? 0;
-                $resumenMensajeria['fallos'] += $stats['failed'] ?? 0;
+            $resumenMensajeria['mensajes_enviados'] +=
+                $stats['total'] ?? 0;
 
-            } catch (\Throwable $e) {
-                logger()->error('Error obteniendo estadísticas de campaña', [
-                    'campania_id' => $campania->id,
-                    'mensajeria_campaign_id' => $campania->mensajeria_campaign_id,
+            $resumenMensajeria['aceptadas_meta'] +=
+                $stats['accepted'] ?? 0;
+
+            $resumenMensajeria['enviados'] +=
+                $stats['sent'] ?? 0;
+
+            $resumenMensajeria['recibidos'] +=
+                $stats['received'] ?? 0;
+
+            $resumenMensajeria['leidos'] +=
+                $stats['read'] ?? 0;
+
+            $resumenMensajeria['confirmados'] +=
+                $stats['confirmed'] ?? 0;
+
+            $resumenMensajeria['cancelados'] +=
+                $stats['cancelled'] ?? 0;
+
+            $resumenMensajeria['fallos'] +=
+                $stats['failed'] ?? 0;
+
+        } catch (\Throwable $e) {
+
+            logger()->error(
+                'Error obteniendo estadísticas de comunicación',
+                [
+                    'comunicacion_id' => $item->id,
                     'error' => $e->getMessage(),
-                ]);
-            }
+                ]
+            );
         }
+    }
 
-        $resumenMensajeria['tasa_lectura'] =
-            $resumenMensajeria['mensajes_enviados'] > 0
-                ? round(($resumenMensajeria['leidos'] / $resumenMensajeria['mensajes_enviados']) * 100, 2)
-                : 0;
+    $resumenMensajeria['tasa_lectura'] =
+        $resumenMensajeria['mensajes_enviados'] > 0
+            ? round(
+                (
+                    $resumenMensajeria['leidos']
+                    /
+                    $resumenMensajeria['mensajes_enviados']
+                ) * 100,
+                2
+            )
+            : 0;
 
-        $comunicaciones = Campania::latest()->paginate(10);
-*/
-// Declaras las variables vacías para que existan
-    $comunicacionActivas  = collect(); 
-    $comunicacionProgramadas = collect();
-    $resumenMensajeria = ['mensajes_enviados' => 0]; // O un array vacío []
-    $resumenMensajeria = ['tasa_lectura' => 0]; // O un array vacío []
-    $resumenMensajeria = ['aceptadas_meta' => 0]; // O un array vacío []
-    $resumenMensajeria = ['enviados' => 0]; // O un array vacío []
-
-    $resumenMensajeria = ['recibidos' => 0]; // O un array vacío []
-    $resumenMensajeria = ['leidos' => 0]; // O un array vacío []
-    $resumenMensajeria = ['fallos' => 0]; // O un array vacío []
-
-        return view('comunicacion.index', compact(
+    return view(
+        'comunicacion.index',
+        compact(
             'comunicacion',
             'comunicacionActivas',
             'comunicacionProgramadas',
             'resumenMensajeria'
-        ));
-    }
+        )
+    );
+}
     
 
     public function create()

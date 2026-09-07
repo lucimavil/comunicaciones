@@ -495,7 +495,6 @@
             placeholder="SELECT
     pf.cd_pessoa_fisica AS codigoPersona,
     pf.nm_pessoa_fisica AS nombrePersona,
-    pf.nr_identidade AS dniPersona,
     pf.nr_telefone_celular AS telefono
 FROM pessoa_fisica pf
 WHERE ..."
@@ -504,7 +503,7 @@ WHERE ..."
         <div class="form-text">
               La consulta debe ser de tipo SELECT, contener FROM y WHERE,
     y devolver los campos:
-    <strong>codigoPersona, nombrePersona, dniPersona y telefono</strong>.
+    <strong>codigoPersona, nombrePersona y telefono</strong>.
         </div>
 
         <div

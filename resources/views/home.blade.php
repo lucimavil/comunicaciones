@@ -40,9 +40,49 @@
                 </div>
             </a>
         </div>
+   <!-- Mensajeria -->
+        <div class="col-md-4">
+            <a href="{{ route('mensajeria.index') }}" class="text-decoration-none">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body">
+                        <h5 class="fw-bold text-primary">Mensajeria</h5>
+                        <p class="text-muted">
+                            Dashboard y seguimiento de mensajes de WhatsApp.
 
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+
+    <a
+        href="{{ route('interconsultas.index') }}"
+        class="text-decoration-none"
+    >
+
+        <div class="card shadow-sm border-0 h-100">
+
+            <div class="card-body">
+
+                <h5 class="fw-bold text-primary">
+                    Interconsultas
+                </h5>
+
+                <p class="text-muted">
+                    Seguimiento de interconsultas,
+                    tiempos de respuesta y mensajería.
+                </p>
+
+            </div>
+
+        </div>
+
+    </a>
+
+</div>
         <!-- OTROS MODULOS -->
-        @foreach(['Encuestas', 'Mensajeria','Interconsultas'] as $modulo)
+        @foreach(['Encuestas'] as $modulo)
         <div class="col-md-4">
             <div class="card bg-light border-0 h-100">
                 <div class="card-body">

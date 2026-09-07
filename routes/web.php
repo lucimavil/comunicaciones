@@ -3,6 +3,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ComunicacionController;
 use App\Http\Controllers\CampaniaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InterconsultaController;
 
 
 Route::middleware('auth')->group(function () {
@@ -80,6 +81,95 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/comunicacion/{comunicacion}/dashboard/excel', [ComunicacionController::class, 'exportarDashboardExcel'])
         ->name('comunicacion.dashboard.excel');
+
+        /*
+|--------------------------------------------------------------------------
+| Mensajería WhatsApp
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    Route::view('/mensajeria', 'mensajeria.index')
+        ->name('mensajeria.index');
+
+    Route::view('/mensajeria/calendario', 'mensajeria.calendario')
+        ->name('mensajeria.calendario');
+
+
+    Route::get('/mensajeria/api/mensajes', function (\Illuminate\Http\Request $request) {
+
+        $response = Http::withoutVerifying()
+            ->timeout(60)
+            ->get(
+                'https://hrc-mensajeria.sanluis.gob.ar:8081/mensajeria-data/mensajes',
+                [
+                    'start' => $request->start,
+                    'end' => $request->end,
+                ]
+            );
+
+        return response()->json(
+            $response->json(),
+            $response->status()
+        );
+
+    })->name('mensajeria.api.mensajes');
+
+
+    Route::get('/mensajeria/api/envios', function (\Illuminate\Http\Request $request) {
+
+        $response = Http::withoutVerifying()
+            ->timeout(60)
+            ->get(
+                'https://hrc-mensajeria.sanluis.gob.ar:8081/mensajeria-data/envios',
+                [
+                    'start' => $request->start,
+                    'end' => $request->end,
+                ]
+            );
+
+        return response()->json(
+            $response->json(),
+            $response->status()
+        );
+
+    })->name('mensajeria.api.envios');
+    Route::get('/mensajeria/api/detalle-mensajes', function (\Illuminate\Http\Request $request) {
+
+    $response = Http::withoutVerifying()
+        ->timeout(60)
+        ->get(
+            'https://hrc-mensajeria.sanluis.gob.ar:8081/mensajeria-data/detalle-mensajes',
+            [
+                'id_envio' => $request->id_envio,
+            ]
+        );
+
+    return response()->json(
+        $response->json(),
+        $response->status()
+    );
+
+})->name('mensajeria.api.detalle');
+
+});
+Route::get(
+        '/interconsultas',
+        [
+            InterconsultaController::class,
+            'index'
+        ]
+    )->name('interconsultas.index');
+
+
+    Route::get(
+        '/interconsultas/{id}',
+        [
+            InterconsultaController::class,
+            'show'
+        ]
+    )->name('interconsultas.show');
 
  });
     

@@ -396,8 +396,19 @@
                 <span>Comunicación</span>
             </a>
           
-
-
+  <div class="nav-section-title">Mensajería </div>
+           
+            <a  href="{{ route('mensajeria.index') }}"  class="nav-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Mensajería</span>
+            </a>
+       
+  <div class="nav-section-title">Interconsultas </div>
+           
+            <a  href="{{ route('interconsultas.index') }}"  class="nav-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Interconsultas</span>
+            </a>
    <div class="sidebar-footer">
     <div class="fw-semibold mb-1">Estado general</div>
 
