@@ -236,13 +236,17 @@ class ComunicacionController extends Controller
         }
 
         $cantidad = (int) $response->json('count');
+        $maxDestinatarios = (int) config('comunicaciones.max_destinatarios', 3000);
 
         return response()->json([
             'success' => true,
             'cantidad' => $cantidad,
+            'max_destinatarios' => $maxDestinatarios,
             'sql_generada' => $sql,
-            'advertencia' => $cantidad > 6000
-                ? 'La segmentación supera el máximo permitido de 6.000 destinatarios.'
+            'advertencia' => $cantidad > $maxDestinatarios
+                ? 'La segmentación supera el máximo permitido de '
+                    . number_format($maxDestinatarios, 0, ',', '.')
+                    . ' destinatarios.'
                 : null,
         ]);
 
@@ -338,12 +342,17 @@ public function guardarBorrador(
 
             $cantidad = (int) $responseCantidad->json('count');
 
-            if ($cantidad > 6000) {
+            $maxDestinatarios = (int) config('comunicaciones.max_destinatarios', 3000);
+
+            if ($cantidad > $maxDestinatarios) {
                 DB::rollBack();
 
                 return response()->json([
-                    'message' => 'La segmentación supera el máximo permitido de 6.000 destinatarios.',
+                    'message' => 'La segmentación supera el máximo permitido de '
+                        . number_format($maxDestinatarios, 0, ',', '.')
+                        . ' destinatarios.',
                     'cantidad_destinatarios' => $cantidad,
+                    'max_destinatarios' => $maxDestinatarios,
                 ], 422);
             }
 
