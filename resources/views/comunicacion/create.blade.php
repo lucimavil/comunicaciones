@@ -1327,6 +1327,16 @@ function wizardComunicacion(
 
                 return;
             }
+
+            if (Number(this.alcance) > 6000) {
+                this.mostrarModal(
+                    'Límite de destinatarios superado',
+                    `La segmentación alcanza a ${this.formatearNumero(this.alcance)} personas. El máximo permitido es 6.000. Ajustá la segmentación para continuar.`,
+                    'warning'
+                );
+
+                return;
+            }
         }
 
             /*
@@ -1516,6 +1526,19 @@ async probarSegmentacion() {
 
         this.advertencia_segmentacion =
             data.advertencia ?? '';
+
+        if (this.alcance > 6000) {
+            this.advertencia_segmentacion =
+                `La segmentación supera el máximo permitido de 6.000 destinatarios. Alcance actual: ${this.formatearNumero(this.alcance)}.`;
+
+            this.mostrarModal(
+                'Límite de destinatarios superado',
+                this.advertencia_segmentacion,
+                'warning'
+            );
+
+            return false;
+        }
 
         if (this.alcance <= 0) {
             this.mostrarModal(
