@@ -37,7 +37,74 @@
                 Información de la interconsulta
             </h5>
 
+            @php
+                $medicoOrigen = $interconsulta['MEDICO_ORIGEN_NOMBRE']
+                    ?? $interconsulta['NOMBRE_MEDICO_ORIGEN']
+                    ?? $interconsulta['NM_MEDICO_ORIGEN']
+                    ?? $interconsulta['MEDICO_ORIGEN']
+                    ?? '-';
+
+                $especialidadOrigen = $interconsulta['ESPECIALIDAD_ORIGEN_NOMBRE']
+                    ?? $interconsulta['NOMBRE_ESPECIALIDAD_ORIGEN']
+                    ?? $interconsulta['DS_ESPECIALIDAD_ORIGEN']
+                    ?? $interconsulta['ESPECIALIDAD_ORIGEN']
+                    ?? '-';
+
+                $tipoInterconsulta = $interconsulta['TIPO_INTERCONSULTA_NOMBRE']
+                    ?? $interconsulta['NOMBRE_TIPO_INTERCONSULTA']
+                    ?? $interconsulta['DS_TIPO_INTERCONSULTA']
+                    ?? $interconsulta['TIPO_INTERCONSULTA']
+                    ?? '-';
+
+                $especialidadDestino = $interconsulta['ESPECIALIDAD_DESTINO_NOMBRE']
+                    ?? $interconsulta['NOMBRE_ESPECIALIDAD_DESTINO']
+                    ?? $interconsulta['DS_ESPECIALIDAD_DESTINO']
+                    ?? $interconsulta['ESPECIALIDAD_DESTINO']
+                    ?? '-';
+
+                $profesionalDestino = $interconsulta['PROFESIONAL_DESTINO_NOMBRE']
+                    ?? $interconsulta['INDIVIDUAL_DESTINO_NOMBRE']
+                    ?? $interconsulta['NOMBRE_PROFESIONAL_DESTINO']
+                    ?? $interconsulta['INDIVIDUAL_DESTINO']
+                    ?? '-';
+
+                $equipoDestino = $interconsulta['EQUIPO_DESTINO_NOMBRE']
+                    ?? $interconsulta['NOMBRE_EQUIPO_DESTINO']
+                    ?? $interconsulta['DS_EQUIPO_DESTINO']
+                    ?? $interconsulta['EQUIPO_DESTINO']
+                    ?? '-';
+
+                $medicoToma = $interconsulta['MEDICO_TOMA_NOMBRE']
+                    ?? $interconsulta['NOMBRE_MEDICO_TOMA']
+                    ?? $interconsulta['NM_MEDICO_TOMA']
+                    ?? $interconsulta['MEDICO_TOMA']
+                    ?? '-';
+
+                $medicoResponde = $interconsulta['MEDICO_RESPONDE_NOMBRE']
+                    ?? $interconsulta['NOMBRE_MEDICO_RESPONDE']
+                    ?? $interconsulta['NM_MEDICO_RESPONDE']
+                    ?? $interconsulta['MEDICO_RESPONDE']
+                    ?? '-';
+
+                $idAtencion = $interconsulta['ID_ATENCION']
+                    ?? $interconsulta['NR_ATENDIMENTO']
+                    ?? $interconsulta['NR_ATENCION']
+                    ?? '-';
+            @endphp
+
             <div class="row g-4">
+
+                {{-- ID ATENCION --}}
+                <div class="col-md-3">
+                    <div class="text-muted small">
+                        ID atención
+                    </div>
+
+                    <div class="fw-semibold">
+                        {{ $idAtencion }}
+                    </div>
+                </div>
+
 
                 {{-- FECHA --}}
                 <div class="col-md-3">
@@ -64,7 +131,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['MEDICO_ORIGEN'] ?? '-' }}
+                        {{ $medicoOrigen }}
                     </div>
                 </div>
 
@@ -76,7 +143,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['ESPECIALIDAD_ORIGEN'] ?? '-' }}
+                        {{ $especialidadOrigen }}
                     </div>
                 </div>
 
@@ -112,7 +179,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['TIPO_INTERCONSULTA'] ?? '-' }}
+                        {{ $tipoInterconsulta }}
                     </div>
                 </div>
 
@@ -124,7 +191,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['ESPECIALIDAD_DESTINO'] ?? '-' }}
+                        {{ $especialidadDestino }}
                     </div>
                 </div>
 
@@ -136,7 +203,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['INDIVIDUAL_DESTINO'] ?? '-' }}
+                        {{ $profesionalDestino }}
                     </div>
                 </div>
 
@@ -148,7 +215,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['EQUIPO_DESTINO'] ?? '-' }}
+                        {{ $equipoDestino }}
                     </div>
                 </div>
 
@@ -160,7 +227,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['MEDICO_TOMA'] ?? '-' }}
+                        {{ $medicoToma }}
                     </div>
                 </div>
 
@@ -198,7 +265,7 @@
                     </div>
 
                     <div class="fw-semibold">
-                        {{ $interconsulta['MEDICO_RESPONDE'] ?? '-' }}
+                        {{ $medicoResponde }}
                     </div>
                 </div>
 
