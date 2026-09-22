@@ -39,50 +39,34 @@
 
             @php
                 $medicoOrigen = $interconsulta['MEDICO_ORIGEN_NOMBRE']
-                    ?? $interconsulta['NOMBRE_MEDICO_ORIGEN']
-                    ?? $interconsulta['NM_MEDICO_ORIGEN']
                     ?? $interconsulta['MEDICO_ORIGEN']
                     ?? '-';
 
                 $especialidadOrigen = $interconsulta['ESPECIALIDAD_ORIGEN_NOMBRE']
-                    ?? $interconsulta['NOMBRE_ESPECIALIDAD_ORIGEN']
-                    ?? $interconsulta['DS_ESPECIALIDAD_ORIGEN']
                     ?? $interconsulta['ESPECIALIDAD_ORIGEN']
                     ?? '-';
 
                 $tipoInterconsulta = $interconsulta['TIPO_INTERCONSULTA_NOMBRE']
-                    ?? $interconsulta['NOMBRE_TIPO_INTERCONSULTA']
-                    ?? $interconsulta['DS_TIPO_INTERCONSULTA']
                     ?? $interconsulta['TIPO_INTERCONSULTA']
                     ?? '-';
 
                 $especialidadDestino = $interconsulta['ESPECIALIDAD_DESTINO_NOMBRE']
-                    ?? $interconsulta['NOMBRE_ESPECIALIDAD_DESTINO']
-                    ?? $interconsulta['DS_ESPECIALIDAD_DESTINO']
                     ?? $interconsulta['ESPECIALIDAD_DESTINO']
                     ?? '-';
 
-                $profesionalDestino = $interconsulta['PROFESIONAL_DESTINO_NOMBRE']
-                    ?? $interconsulta['INDIVIDUAL_DESTINO_NOMBRE']
-                    ?? $interconsulta['NOMBRE_PROFESIONAL_DESTINO']
+                $profesionalDestino = $interconsulta['INDIVIDUAL_DESTINO_NOMBRE']
                     ?? $interconsulta['INDIVIDUAL_DESTINO']
                     ?? '-';
 
                 $equipoDestino = $interconsulta['EQUIPO_DESTINO_NOMBRE']
-                    ?? $interconsulta['NOMBRE_EQUIPO_DESTINO']
-                    ?? $interconsulta['DS_EQUIPO_DESTINO']
                     ?? $interconsulta['EQUIPO_DESTINO']
                     ?? '-';
 
                 $medicoToma = $interconsulta['MEDICO_TOMA_NOMBRE']
-                    ?? $interconsulta['NOMBRE_MEDICO_TOMA']
-                    ?? $interconsulta['NM_MEDICO_TOMA']
                     ?? $interconsulta['MEDICO_TOMA']
                     ?? '-';
 
                 $medicoResponde = $interconsulta['MEDICO_RESPONDE_NOMBRE']
-                    ?? $interconsulta['NOMBRE_MEDICO_RESPONDE']
-                    ?? $interconsulta['NM_MEDICO_RESPONDE']
                     ?? $interconsulta['MEDICO_RESPONDE']
                     ?? '-';
 
