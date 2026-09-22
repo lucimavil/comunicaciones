@@ -240,7 +240,8 @@
                     <thead class="table-light">
 
                     <tr>
-                        <th>ID</th>
+                        <th>ID Interconsulta</th>
+                        <th>ID Atención</th>
                         <th>Fecha</th>
                         <th>Médico origen</th>
                         <th>Destino</th>
@@ -274,14 +275,45 @@
                                         'bg-warning text-dark',
                                 };
 
+                            $medicoOrigen =
+                                $i['MEDICO_ORIGEN_NOMBRE']
+                                ?? $i['NOMBRE_MEDICO_ORIGEN']
+                                ?? $i['NM_MEDICO_ORIGEN']
+                                ?? $i['MEDICO_ORIGEN']
+                                ?? '-';
+
+                            $especialidadDestino =
+                                $i['ESPECIALIDAD_DESTINO_NOMBRE']
+                                ?? $i['NOMBRE_ESPECIALIDAD_DESTINO']
+                                ?? $i['DS_ESPECIALIDAD_DESTINO']
+                                ?? null;
+
+                            $profesionalDestino =
+                                $i['PROFESIONAL_DESTINO_NOMBRE']
+                                ?? $i['INDIVIDUAL_DESTINO_NOMBRE']
+                                ?? $i['NOMBRE_PROFESIONAL_DESTINO']
+                                ?? null;
+
+                            $equipoDestino =
+                                $i['EQUIPO_DESTINO_NOMBRE']
+                                ?? $i['NOMBRE_EQUIPO_DESTINO']
+                                ?? $i['DS_EQUIPO_DESTINO']
+                                ?? null;
+
                             $destino =
-                                $i['ESPECIALIDAD_DESTINO']
-                                ??
-                                $i['INDIVIDUAL_DESTINO']
-                                ??
-                                $i['EQUIPO_DESTINO']
-                                ??
-                                '-';
+                                $profesionalDestino
+                                ?? $especialidadDestino
+                                ?? $equipoDestino
+                                ?? $i['INDIVIDUAL_DESTINO']
+                                ?? $i['ESPECIALIDAD_DESTINO']
+                                ?? $i['EQUIPO_DESTINO']
+                                ?? '-';
+
+                            $idAtencion =
+                                $i['ID_ATENCION']
+                                ?? $i['NR_ATENDIMENTO']
+                                ?? $i['NR_ATENCION']
+                                ?? '-';
 
                         @endphp
 
@@ -290,6 +322,10 @@
 
                             <td class="fw-semibold">
                                 {{ $i['ID_INTERCONSULTA_REQ'] }}
+                            </td>
+
+                            <td>
+                                {{ $idAtencion }}
                             </td>
 
                             <td>
@@ -302,7 +338,7 @@
                             </td>
 
                             <td>
-                                {{ $i['MEDICO_ORIGEN'] ?? '-' }}
+                                {{ $medicoOrigen }}
                             </td>
 
                             <td>
@@ -357,7 +393,7 @@
 
                         <tr>
                             <td
-                                colspan="9"
+                                colspan="10"
                                 class="text-center text-muted py-4"
                             >
                                 No hay interconsultas.
