@@ -1756,9 +1756,14 @@ formData.append(
                         raw
                     );
 
+                    const mensajeError =
+                        response.status === 413
+                            ? 'El archivo adjunto supera el tamaño máximo permitido por el servidor.'
+                            : 'El servidor no pudo procesar la solicitud. Revisá el tamaño del archivo adjunto e intentá nuevamente.';
+
                     this.mostrarModal(
-                        'Error inesperado',
-                        'El servidor no devolvió JSON. Revisá la consola para ver el error real.',
+                        'No se pudo guardar',
+                        mensajeError,
                         'error'
                     );
 
