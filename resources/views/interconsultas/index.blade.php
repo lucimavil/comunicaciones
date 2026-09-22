@@ -277,27 +277,19 @@
 
                             $medicoOrigen =
                                 $i['MEDICO_ORIGEN_NOMBRE']
-                                ?? $i['NOMBRE_MEDICO_ORIGEN']
-                                ?? $i['NM_MEDICO_ORIGEN']
                                 ?? $i['MEDICO_ORIGEN']
                                 ?? '-';
 
                             $especialidadDestino =
                                 $i['ESPECIALIDAD_DESTINO_NOMBRE']
-                                ?? $i['NOMBRE_ESPECIALIDAD_DESTINO']
-                                ?? $i['DS_ESPECIALIDAD_DESTINO']
                                 ?? null;
 
                             $profesionalDestino =
-                                $i['PROFESIONAL_DESTINO_NOMBRE']
-                                ?? $i['INDIVIDUAL_DESTINO_NOMBRE']
-                                ?? $i['NOMBRE_PROFESIONAL_DESTINO']
+                                $i['INDIVIDUAL_DESTINO_NOMBRE']
                                 ?? null;
 
                             $equipoDestino =
                                 $i['EQUIPO_DESTINO_NOMBRE']
-                                ?? $i['NOMBRE_EQUIPO_DESTINO']
-                                ?? $i['DS_EQUIPO_DESTINO']
                                 ?? null;
 
                             $destino =
