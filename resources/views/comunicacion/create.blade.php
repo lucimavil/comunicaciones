@@ -1015,6 +1015,8 @@ WHERE ..."
 
 @push('scripts')
 <script>
+const MAX_DESTINATARIOS_COMUNICACION = @json(config('comunicaciones.max_destinatarios', 3000));
+
 function wizardComunicacion(
     comunicacion = null,
     segmentosDisponibles = []
@@ -1328,10 +1330,10 @@ function wizardComunicacion(
                 return;
             }
 
-            if (Number(this.alcance) > 6000) {
+            if (Number(this.alcance) > MAX_DESTINATARIOS_COMUNICACION) {
                 this.mostrarModal(
                     'Límite de destinatarios superado',
-                    `La segmentación alcanza a ${this.formatearNumero(this.alcance)} personas. El máximo permitido es 6.000. Ajustá la segmentación para continuar.`,
+                    `La segmentación alcanza a ${this.formatearNumero(this.alcance)} personas. El máximo permitido es ${this.formatearNumero(MAX_DESTINATARIOS_COMUNICACION)}. Ajustá la segmentación para continuar.`,
                     'warning'
                 );
 
@@ -1527,9 +1529,9 @@ async probarSegmentacion() {
         this.advertencia_segmentacion =
             data.advertencia ?? '';
 
-        if (this.alcance > 6000) {
+        if (this.alcance > MAX_DESTINATARIOS_COMUNICACION) {
             this.advertencia_segmentacion =
-                `La segmentación supera el máximo permitido de 6.000 destinatarios. Alcance actual: ${this.formatearNumero(this.alcance)}.`;
+                `La segmentación supera el máximo permitido de ${this.formatearNumero(MAX_DESTINATARIOS_COMUNICACION)} destinatarios. Alcance actual: ${this.formatearNumero(this.alcance)}.`;
 
             this.mostrarModal(
                 'Límite de destinatarios superado',
