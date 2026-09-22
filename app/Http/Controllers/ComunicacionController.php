@@ -18,6 +18,8 @@ class ComunicacionController extends Controller
    public function index(
     SegmentacionPersonalService $segmentacionService
 ) {
+    $this->sincronizarComunicacionesConMensajeria($segmentacionService);
+
     $comunicacion = Comunicacion::with('responsable')
         ->latest()
         ->get();
@@ -115,6 +117,48 @@ class ComunicacionController extends Controller
         )
     );
 }
+
+    private function sincronizarComunicacionesConMensajeria(
+        SegmentacionPersonalService $segmentacionService
+    ): void {
+        $comunicaciones = Comunicacion::whereIn(
+            'estado',
+            ['programada', 'ejecutando']
+        )
+        ->whereNotNull('fecha_programada')
+        ->where('fecha_programada', '<=', now())
+        ->get();
+
+        foreach ($comunicaciones as $comunicacion) {
+            try {
+                $response = $segmentacionService
+                    ->obtenerComunicacion($comunicacion->id);
+
+                if (!$response->successful()) {
+                    continue;
+                }
+
+                $data = $response->json();
+                $status = $data['status'] ?? null;
+
+                if ($status === 'SENT') {
+                    $comunicacion->update([
+                        'estado' => 'finalizada',
+                    ]);
+                }
+
+            } catch (\Throwable $e) {
+                logger()->error(
+                    'Error sincronizando comunicación con mensajería',
+                    [
+                        'comunicacion_id' => $comunicacion->id,
+                        'error' => $e->getMessage(),
+                    ]
+                );
+            }
+        }
+    }
+
     
 
     public function create()
