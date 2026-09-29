@@ -3,6 +3,64 @@
 @section('title', 'Dashboard')
 
 @section('content')
+<style>
+    .campaign-toolbar-btn {
+        border-radius: 12px;
+        padding: .65rem 1rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        transition: all .2s ease;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+    }
+
+    .campaign-toolbar-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .10);
+    }
+
+    .campaign-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #475569;
+        transition: all .18s ease;
+        text-decoration: none;
+    }
+
+    .campaign-action:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 14px rgba(15, 23, 42, .08);
+    }
+
+    .campaign-action-danger {
+        color: #dc2626;
+    }
+
+    .campaign-action-danger:hover {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    .campaign-dashboard-btn {
+        border-radius: 10px;
+        padding: .48rem .8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        text-decoration: none;
+    }
+</style>
+
   <div class="hero-card mb-4">
                 <span class="badge text-bg-light text-primary d-inline-flex align-items-center px-3 py-2 rounded-pill mb-3" style="width: fit-content;">
                     <i class="bi bi-whatsapp me-2"></i>Campañas
@@ -22,13 +80,12 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="section-title mb-0">Tablero de control</h3>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary rounded-3">
-                        <i class="bi bi-funnel me-2"></i>Filtrar
+                    <button class="btn btn-light border campaign-toolbar-btn">
+                        <i class="bi bi-funnel"></i>Filtrar
                     </button>
-                    <a  href="{{ route('campanias.create') }}">
-                    <button class="btn btn-primary rounded-3 px-3">
-                        <i class="bi bi-plus-lg me-2"></i>Nueva campaña
-                    </button></a>
+                    <a href="{{ route('campanias.create') }}" class="btn btn-primary campaign-toolbar-btn">
+                        <i class="bi bi-plus-lg"></i>Nueva campaña
+                    </a>
                 </div>
             </div>
 
@@ -104,8 +161,8 @@
           <div class="panel-card">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="fw-bold mb-0">Últimas campañas</h4>
-        <a href="{{ route('campanias.index') }}" class="btn btn-sm btn-light border rounded-3">
-            Ver todas
+        <a href="{{ route('campanias.index') }}" class="btn btn-light border campaign-toolbar-btn">
+            <i class="bi bi-grid"></i>Ver todas
         </a>
     </div>
 
@@ -114,7 +171,6 @@
             <thead>
                 <tr>
                      <th>Id</th>
-                    <th>ID Mensajería</th>
                     <th>Campaña</th>
                     <th>Solicitante</th>
                     <th>Fecha Creación</th>
@@ -129,9 +185,6 @@
                     <tr>
                         <td>
                             <div class="fw-semibold">{{ $campania->id }}</div>
-                        </td>
-                        <td>
-                            <div class="fw-semibold">{{ $campania->mensajeria_campaign_id ?? '-' }}</div>
                         </td>
                         <td>
                             <div class="fw-semibold">{{ $campania->titulo }}</div>
@@ -174,9 +227,9 @@
                           
                            @if(in_array($estado, ['programada', 'borrador']) && $campania->puedeEditarse())
                                 <a href="{{ route('campanias.edit', $campania->id) }}"
-                                class="btn btn-sm btn-light border"
+                                class="campaign-action"
                                 title="Editar campaña">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
                             @endif
                             @if(in_array($estado, ['programada', 'borrador']) && $campania->puedeEditarse())
@@ -184,7 +237,7 @@
 
                               <button
                                 type="button"
-                                class="btn btn-sm btn-light border text-danger"
+                                class="campaign-action campaign-action-danger"
                                 title="Eliminar campaña"
                                 data-bs-toggle="modal"
                                 data-bs-target="#modalEliminarCampania{{ $campania->id }}"
@@ -193,13 +246,13 @@
                             </button>
                                
                             @endif
-                             <a href="{{ route('campanias.show', $campania->id) }}" class="btn btn-sm btn-light border">
+                             <a href="{{ route('campanias.show', $campania->id) }}" class="campaign-action" title="Ver campaña">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 @if($campania->estado === 'finalizada')
                                     <a href="{{ route('campanias.dashboard', $campania->id) }}"
-                                    class="btn btn-sm btn-outline-primary">
-                                        Ver dashboard
+                                    class="btn btn-primary btn-sm campaign-dashboard-btn">
+                                        <i class="bi bi-bar-chart-line"></i>Dashboard
                                     </a>
                                 @endif
                         </td>
