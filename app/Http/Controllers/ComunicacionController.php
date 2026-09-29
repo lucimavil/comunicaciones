@@ -46,53 +46,44 @@ class ComunicacionController extends Controller
         'fallos' => 0,
     ];
 
-    $comunicacionesMensajeria = Comunicacion::whereIn(
-        'estado',
-        ['programada', 'finalizada']
-    )->get();
+    $comunicacionesMensajeria = Comunicacion::with('destinatarios')
+        ->whereIn('estado', ['programada', 'finalizada'])
+        ->get();
 
     foreach ($comunicacionesMensajeria as $item) {
-        try {
+        $destinatarios = $item->destinatarios;
 
-            $stats = $segmentacionService
-                ->obtenerEstadisticasComunicacion(
-                    $item->id
-                );
+        $resumenMensajeria['mensajes_enviados'] += $destinatarios->count();
 
-            $resumenMensajeria['mensajes_enviados'] +=
-                $stats['total'] ?? 0;
+        $resumenMensajeria['enviados'] += $destinatarios
+            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'enviado')
+            ->count();
 
-            $resumenMensajeria['aceptadas_meta'] +=
-                $stats['accepted'] ?? 0;
+        $resumenMensajeria['recibidos'] += $destinatarios
+            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'recibido')
+            ->count();
 
-            $resumenMensajeria['enviados'] +=
-                $stats['sent'] ?? 0;
+        $resumenMensajeria['leidos'] += $destinatarios
+            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'leido')
+            ->count();
 
-            $resumenMensajeria['recibidos'] +=
-                $stats['received'] ?? 0;
+        $resumenMensajeria['confirmados'] += $destinatarios
+            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'confirmado')
+            ->count();
 
-            $resumenMensajeria['leidos'] +=
-                $stats['read'] ?? 0;
+        $resumenMensajeria['cancelados'] += $destinatarios
+            ->filter(fn ($d) => in_array(
+                strtolower((string) ($d->estado ?? '')),
+                ['cancelado', 'canceladoporpaciente', 'canceladoporsistema']
+            ))
+            ->count();
 
-            $resumenMensajeria['confirmados'] +=
-                $stats['confirmed'] ?? 0;
-
-            $resumenMensajeria['cancelados'] +=
-                $stats['cancelled'] ?? 0;
-
-            $resumenMensajeria['fallos'] +=
-                $stats['failed'] ?? 0;
-
-        } catch (\Throwable $e) {
-
-            logger()->error(
-                'Error obteniendo estadísticas de comunicación',
-                [
-                    'comunicacion_id' => $item->id,
-                    'error' => $e->getMessage(),
-                ]
-            );
-        }
+        $resumenMensajeria['fallos'] += $destinatarios
+            ->filter(fn ($d) => in_array(
+                strtolower((string) ($d->estado ?? '')),
+                ['fallo', 'fallido', 'noaceptadometa']
+            ))
+            ->count();
     }
 
     $resumenMensajeria['tasa_lectura'] =
