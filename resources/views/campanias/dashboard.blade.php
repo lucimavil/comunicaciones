@@ -33,25 +33,16 @@
     }
 
     .dashboard-back {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        color: #334155;
+        color: #0f172a;
         text-decoration: none;
         background: #fff;
-        transition: all .2s ease;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, .05);
-    }
-
-    .dashboard-back:hover {
-        background: #f8fafc;
-        color: #0f172a;
-        transform: translateX(-2px);
-        box-shadow: 0 8px 18px rgba(15, 23, 42, .09);
     }
 
     .dashboard-title {
@@ -189,26 +180,19 @@
     }
 
     .export-btn {
-        border: 0;
-        background: #0f172a;
-        border-radius: 12px;
-        padding: 10px 16px;
+        border: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 10px;
+        padding: 8px 14px;
         font-weight: 700;
         text-decoration: none;
-        color: #fff;
+        color: #0f172a;
         font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all .2s ease;
-        box-shadow: 0 6px 16px rgba(15, 23, 42, .14);
     }
 
     .export-btn:hover {
-        background: #1e293b;
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 10px 22px rgba(15, 23, 42, .18);
+        background: #f8fafc;
+        color: #0f172a;
     }
 
     .detail-table-wrap {
@@ -302,8 +286,8 @@
 
     <div class="dashboard-header">
         <div class="dashboard-title-wrap">
-            <a href="{{ route('campanias.index') }}" class="dashboard-back" title="Volver a campañas">
-                <i class="bi bi-arrow-left"></i>
+            <a href="{{ route('campanias.index') }}" class="dashboard-back">
+                ←
             </a>
 
             <div>
@@ -418,7 +402,7 @@
                 <div class="export-actions">
  
                     <a href="{{ route('campanias.dashboard.excel', $campania->id) }}" class="export-btn">
-                        <i class="bi bi-file-earmark-excel"></i>Exportar Excel
+                        Excel
                     </a>
                 </div>
             </div>
