@@ -534,9 +534,10 @@ private function condicionPorSegmento(string $codigo): ?string
         ",
 
         'TRABAJO_SOCIAL' => "
-            REGEXP_LIKE(
-                p.especialidades_normalizadas,
-                '(^|\\\\)(TRABAJO SOCIAL|TRABAJO SOCIAL \\(SALUD MENTAL\\))(\\\\|$)'
+            (
+                p.especialidades_normalizadas LIKE '%TRABAJO SOCIAL%'
+                OR p.especialidades_normalizadas LIKE '%TRABAJADOR SOCIAL%'
+                OR p.especialidades_normalizadas LIKE '%SERVICIO SOCIAL%'
             )
         ",
 
