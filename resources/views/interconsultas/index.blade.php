@@ -220,15 +220,30 @@
 
         <div class="card-body">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
 
                 <h5 class="fw-bold mb-0">
                     Interconsultas
                 </h5>
 
-                <span class="badge bg-secondary">
-                    {{ $interconsultas->count() }}
-                </span>
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+                    <div class="input-group" style="min-width: 280px;">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input
+                            type="search"
+                            id="buscadorInterconsultas"
+                            class="form-control"
+                            placeholder="Buscar interconsulta..."
+                            aria-label="Buscar interconsultas"
+                        >
+                    </div>
+
+                    <span class="badge bg-secondary" id="contadorInterconsultas">
+                        {{ $interconsultas->count() }}
+                    </span>
+                </div>
 
             </div>
 
@@ -310,7 +325,7 @@
                         @endphp
 
 
-                        <tr>
+                        <tr class="fila-interconsulta">
 
                             <td class="fw-semibold">
                                 {{ $i['ID_INTERCONSULTA_REQ'] }}
@@ -394,6 +409,12 @@
 
                     @endforelse
 
+                        <tr id="sinResultadosBusqueda" class="d-none">
+                            <td colspan="10" class="text-center text-muted py-4">
+                                No se encontraron interconsultas con ese criterio.
+                            </td>
+                        </tr>
+
                     </tbody>
 
                 </table>
@@ -405,5 +426,41 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buscador = document.getElementById('buscadorInterconsultas');
+    const filas = Array.from(document.querySelectorAll('.fila-interconsulta'));
+    const contador = document.getElementById('contadorInterconsultas');
+    const sinResultados = document.getElementById('sinResultadosBusqueda');
+
+    if (!buscador) {
+        return;
+    }
+
+    buscador.addEventListener('input', function () {
+        const termino = this.value.trim().toLowerCase();
+        let visibles = 0;
+
+        filas.forEach(function (fila) {
+            const coincide = fila.textContent.toLowerCase().includes(termino);
+
+            fila.classList.toggle('d-none', !coincide);
+
+            if (coincide) {
+                visibles++;
+            }
+        });
+
+        if (contador) {
+            contador.textContent = visibles;
+        }
+
+        if (sinResultados) {
+            sinResultados.classList.toggle('d-none', visibles > 0);
+        }
+    });
+});
+</script>
 
 @endsection
