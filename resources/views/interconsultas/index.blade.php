@@ -4,18 +4,12 @@
 
 <div class="container-fluid py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <span class="text-muted small">
-                Mensajería clínica
-            </span>
-
-            <h2 class="fw-bold mb-0">
-                Dashboard de Interconsultas
-            </h2>
-        </div>
-
+    <div class="hero-card-interconsultas mb-4">
+        <span class="badge text-bg-light text-primary d-inline-flex align-items-center px-3 py-2 rounded-pill mb-3" style="width: fit-content;">
+            <i class="bi bi-clipboard2-pulse me-2"></i>Interconsultas
+        </span>
+        <h1>Dashboard de Interconsultas</h1>
+        <p>Visualizá solicitudes, tiempos de respuesta, estados y mensajería clínica desde un único tablero.</p>
     </div>
 
 
