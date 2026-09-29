@@ -131,6 +131,9 @@
                             <div class="fw-semibold">{{ $campania->id }}</div>
                         </td>
                         <td>
+                            <div class="fw-semibold">{{ $campania->mensajeria_campaign_id ?? '-' }}</div>
+                        </td>
+                        <td>
                             <div class="fw-semibold">{{ $campania->titulo }}</div>
                             <div class="small text-secondary">
                                 {{ $campania->descripcion }}
