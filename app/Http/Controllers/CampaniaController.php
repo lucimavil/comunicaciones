@@ -47,7 +47,7 @@ class CampaniaController extends Controller
         foreach ($campaniasConMensajeria as $campania) {
             try {
                 $stats = $mensajeriaService->obtenerEstadisticas(
-                    $campania->id
+                    $campania->mensajeria_campaign_id
                 );
 
                 $resumenMensajeria['mensajes_enviados'] += $stats['total'] ?? 0;
@@ -88,7 +88,9 @@ private function sincronizarCampaniasConMensajeria(MensajeriaService $mensajeria
 
     foreach ($campanias as $campania) {
         try {
-            $response = $mensajeriaService->obtenerCampania($campania->id);
+            $campaignId = $campania->mensajeria_campaign_id ?? $campania->id;
+
+            $response = $mensajeriaService->obtenerCampania($campaignId);
 
             if (!$response->successful()) {
                 continue;
