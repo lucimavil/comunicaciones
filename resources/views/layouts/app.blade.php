@@ -201,6 +201,30 @@
             color: rgba(255,255,255,0.86);
         }
 
+        .hero-card-interconsultas {
+            background: linear-gradient(135deg, rgba(76,29,149,0.95), rgba(99,102,241,0.88)),
+                        url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop') center/cover;
+            border-radius: 24px;
+            min-height: 220px;
+            color: #fff;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hero-card-interconsultas h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: .25rem;
+        }
+
+        .hero-card-interconsultas p {
+            margin-bottom: 0;
+            color: rgba(255,255,255,0.86);
+        }
+
 
         .info-alert {
             background: #fff7ed;
