@@ -114,6 +114,7 @@
             <thead>
                 <tr>
                      <th>Id</th>
+                    <th>ID Mensajería</th>
                     <th>Campaña</th>
                     <th>Solicitante</th>
                     <th>Fecha Creación</th>
@@ -241,7 +242,7 @@
 </div>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-secondary py-4">
+                        <td colspan="8" class="text-center text-secondary py-4">
                             No hay campañas registradas
                         </td>
                     </tr>
