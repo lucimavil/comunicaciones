@@ -114,6 +114,7 @@
             <thead>
                 <tr>
                      <th>Id</th>
+                    <th>ID Campaña Mensajería</th>
                     <th>Campaña</th>
                     <th>Solicitante</th>
                     <th>Fecha Creación</th>
@@ -128,6 +129,9 @@
                     <tr>
                         <td>
                             <div class="fw-semibold">{{ $campania->id }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ $campania->mensajeria_campaign_id ?? '-' }}</div>
                         </td>
                         <td>
                             <div class="fw-semibold">{{ $campania->titulo }}</div>
@@ -241,7 +245,7 @@
 </div>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-secondary py-4">
+                        <td colspan="9" class="text-center text-secondary py-4">
                             No hay campañas registradas
                         </td>
                     </tr>
