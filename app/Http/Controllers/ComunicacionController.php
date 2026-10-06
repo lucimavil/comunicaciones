@@ -46,56 +46,35 @@ class ComunicacionController extends Controller
         'fallos' => 0,
     ];
 
-    $comunicacionesMensajeria = Comunicacion::with('destinatarios')
-        ->whereIn('estado', ['programada', 'finalizada'])
-        ->get();
+    $comunicacionesMensajeria = Comunicacion::whereIn(
+        'estado',
+        ['programada', 'finalizada']
+    )->get();
 
     foreach ($comunicacionesMensajeria as $item) {
-        $destinatarios = $item->destinatarios;
+        try {
+            $estadisticas = $segmentacionService
+                ->obtenerEstadisticasComunicacion($item->id);
 
-        $resumenMensajeria['mensajes_enviados'] += $destinatarios->count();
-
-        $resumenMensajeria['enviados'] += $destinatarios
-            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'enviado')
-            ->count();
-
-        $resumenMensajeria['recibidos'] += $destinatarios
-            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'recibido')
-            ->count();
-
-        $resumenMensajeria['leidos'] += $destinatarios
-            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'leido')
-            ->count();
-
-        $resumenMensajeria['confirmados'] += $destinatarios
-            ->filter(fn ($d) => strtolower((string) ($d->estado ?? '')) === 'confirmado')
-            ->count();
-
-        $resumenMensajeria['cancelados'] += $destinatarios
-            ->filter(fn ($d) => in_array(
-                strtolower((string) ($d->estado ?? '')),
-                ['cancelado', 'canceladoporpaciente', 'canceladoporsistema']
-            ))
-            ->count();
-
-        $resumenMensajeria['fallos'] += $destinatarios
-            ->filter(fn ($d) => in_array(
-                strtolower((string) ($d->estado ?? '')),
-                ['fallo', 'fallido', 'noaceptadometa']
-            ))
-            ->count();
+            $resumenMensajeria['mensajes_enviados'] += (int) ($estadisticas['total'] ?? 0);
+            $resumenMensajeria['aceptadas_meta'] += (int) ($estadisticas['accepted'] ?? 0);
+            $resumenMensajeria['enviados'] += (int) ($estadisticas['sent'] ?? 0);
+            $resumenMensajeria['recibidos'] += (int) ($estadisticas['received'] ?? 0);
+            $resumenMensajeria['leidos'] += (int) ($estadisticas['read'] ?? 0);
+            $resumenMensajeria['confirmados'] += (int) ($estadisticas['confirmed'] ?? 0);
+            $resumenMensajeria['cancelados'] += (int) ($estadisticas['cancelled'] ?? 0);
+            $resumenMensajeria['fallos'] += (int) ($estadisticas['failed'] ?? 0);
+        } catch (\Throwable $e) {
+            logger()->error('Error consultando estadísticas de comunicación en mensajería', [
+                'comunicacion_id' => $item->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     $resumenMensajeria['tasa_lectura'] =
         $resumenMensajeria['mensajes_enviados'] > 0
-            ? round(
-                (
-                    $resumenMensajeria['leidos']
-                    /
-                    $resumenMensajeria['mensajes_enviados']
-                ) * 100,
-                2
-            )
+            ? round(($resumenMensajeria['leidos'] / $resumenMensajeria['mensajes_enviados']) * 100, 2)
             : 0;
 
     return view(
@@ -183,46 +162,28 @@ class ComunicacionController extends Controller
             ->route('comunicacion.index')
             ->with('success', 'Comunicación creada correctamente');
     }
-  public function dashboard(Comunicacion $comunicacion)
-{
-    $comunicacion->load([
-        'destinatarios.user'
-    ]);
+  public function dashboard(
+    Comunicacion $comunicacion,
+    SegmentacionPersonalService $segmentacionService
+) {
+    $detalle = $segmentacionService
+        ->obtenerDetalleComunicacion($comunicacion->id);
 
-    $total = $comunicacion->destinatarios->count();
-
-    $leidos = $comunicacion->destinatarios
-        ->where('estado', 'leido')
-        ->count();
-
-    $enviados = $comunicacion->destinatarios
-        ->where('estado', 'enviado')
-        ->count();
-
-    $recibidos = $comunicacion->destinatarios
-        ->where('estado', 'recibido')
-        ->count();
-
-    $fallidos = $comunicacion->destinatarios
-        ->filter(function ($destinatario) {
-            return in_array(
-                strtolower($destinatario->estado ?? ''),
-                [
-                    'fallo',
-                    'fallido',
-                    'noaceptadometa'
-                ]
-            );
-        })
-        ->count();
+    $estadisticas = $segmentacionService
+        ->obtenerEstadisticasComunicacion($comunicacion->id);
 
     return view('comunicacion.dashboard', [
         'com' => $comunicacion,
-        'total' => $total,
-        'leidos' => $leidos,
-        'enviados' => $enviados,
-        'recibidos' => $recibidos,
-        'fallidos' => $fallidos,
+        'detalle' => $detalle,
+        'total' => (int) ($estadisticas['total'] ?? 0),
+        'aceptados' => (int) ($estadisticas['accepted'] ?? 0),
+        'enviados' => (int) ($estadisticas['sent'] ?? 0),
+        'recibidos' => (int) ($estadisticas['received'] ?? 0),
+        'leidos' => (int) ($estadisticas['read'] ?? 0),
+        'confirmados' => (int) ($estadisticas['confirmed'] ?? 0),
+        'cancelados' => (int) ($estadisticas['cancelled'] ?? 0),
+        'fallidos' => (int) ($estadisticas['failed'] ?? 0),
+        'tasaLectura' => (float) ($estadisticas['tasa_lectura'] ?? 0),
     ]);
 }
     public function probarSegmentacion(
