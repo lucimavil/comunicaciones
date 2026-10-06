@@ -47,7 +47,7 @@ class CampaniaController extends Controller
         foreach ($campaniasConMensajeria as $campania) {
             try {
                 $stats = $mensajeriaService->obtenerEstadisticas(
-                    $campania->mensajeria_campaign_id
+                    $campania->id
                 );
 
                 $resumenMensajeria['mensajes_enviados'] += $stats['total'] ?? 0;
@@ -306,14 +306,12 @@ public function dashboard(
     Campania $campania,
     MensajeriaService $mensajeriaService
 ) {
-    $campaniaMensajeriaId = $campania->mensajeria_campaign_id ?? $campania->id;
-
     $estadisticas = $mensajeriaService->obtenerEstadisticas(
-       $campaniaMensajeriaId
+       $campania->id
     );
 
     $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
-       $campaniaMensajeriaId
+       $campania->id
     );
 
     return view(
