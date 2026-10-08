@@ -879,7 +879,7 @@ public function programar(
     }
 
     $payload = [
-        'campaignId' => $campania->mensajeria_campaign_id ?? $campania->id,
+        'campaignId' => $campania->id,
         'sqlQuery' => $sqlQuery,
         'message' => $campania->mensaje,
         'scheduledAt' => Carbon::parse($request->fecha_programada)->format('Y-m-d\TH:i:s'),
