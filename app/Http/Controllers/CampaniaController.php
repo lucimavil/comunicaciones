@@ -812,7 +812,7 @@ public function guardarBorrador(Request $request,MensajeriaService $mensajeriaSe
                 $payload['nombreArchivo'] = $campania->adjunto_nombre;
                 $payload['urlArchivo'] = asset('storage/' . $campania->adjunto_path);
             }
-            $response = $mensajeriaService->actualizarCampania( $campania->mensajeria_campaign_id ?? $campania->id,$payload);
+            $response = $mensajeriaService->actualizarCampania( $campania->id,$payload);
 
             if (!$response->successful()) {
                 throw new \Exception(
