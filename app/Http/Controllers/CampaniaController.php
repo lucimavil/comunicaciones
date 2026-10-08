@@ -88,9 +88,7 @@ private function sincronizarCampaniasConMensajeria(MensajeriaService $mensajeria
 
     foreach ($campanias as $campania) {
         try {
-            $campaignId = $campania->mensajeria_campaign_id ?? $campania->id;
-
-            $response = $mensajeriaService->obtenerCampania($campaignId);
+            $response = $mensajeriaService->obtenerCampania($campania->id);
 
             if (!$response->successful()) {
                 continue;
