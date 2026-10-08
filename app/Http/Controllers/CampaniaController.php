@@ -899,7 +899,7 @@ public function programar(
     try {
         if ($campania->estado === 'programada' && $campania->mensajeria_campaign_id) {
             $response = $mensajeriaService->actualizarCampania(
-                $campania->mensajeria_campaign_id,
+                $campania->id,
                 $payload
             );
         } else {
