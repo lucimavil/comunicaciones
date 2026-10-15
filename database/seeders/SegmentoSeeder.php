@@ -63,12 +63,14 @@ class SegmentoSeeder extends Seeder
                 'nombre' => 'Técnicos',
                 'descripcion' => 'Personal técnico asistencial.',
                 'orden' => 9,
+                'activo' => false,
             ],
             [
                 'codigo' => 'ADMINISTRATIVOS',
                 'nombre' => 'Administrativos',
                 'descripcion' => 'Personal administrativo.',
                 'orden' => 10,
+                'activo' => false,
             ],
             [
                 'codigo' => 'DIRECTIVOS',
