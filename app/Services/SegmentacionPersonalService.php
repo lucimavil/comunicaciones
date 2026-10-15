@@ -211,7 +211,9 @@ private function consultaTodoPersonal(): string
 
         FROM pessoa_fisica pf
 
-        WHERE pf.ie_vinculo_profissional = 1
+        WHERE 1 = 1
+
+        -- AND pf.ie_vinculo_profissional = 1
 
           AND EXISTS (
               SELECT 1
@@ -367,7 +369,9 @@ private function consultaSegmentosProfesionales(
             LEFT JOIN medico m
                 ON m.cd_pessoa_fisica = pf.cd_pessoa_fisica
 
-            WHERE pf.ie_vinculo_profissional = 1
+            WHERE 1 = 1
+
+            -- AND pf.ie_vinculo_profissional = 1
 
               AND pf.nr_telefone_celular IS NOT NULL
 
@@ -464,7 +468,9 @@ private function consultaDirectivos(): string
             ON pfc.cd_pessoa_fisica =
                pf.cd_pessoa_fisica
 
-        WHERE pf.ie_vinculo_profissional = 1
+        WHERE 1 = 1
+
+        -- AND pf.ie_vinculo_profissional = 1
 
           AND pfc.nr_seq_classif IN (9, 10)
 
