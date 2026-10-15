@@ -277,8 +277,14 @@ private function consultaPorSegmentos(array $segmentosIds): string
         foreach ($segmentosEspecialidades as $codigo) {
             $condicion = $this->condicionPorSegmento($codigo);
 
-            if ($condicion) {
+            $condicionUsuario = $this->condicionUsuarioPorSegmento($codigo);
+
+            if ($condicion && $condicionUsuario) {
+                $condiciones[] = "({$condicion} OR {$condicionUsuario})";
+            } elseif ($condicion) {
                 $condiciones[] = $condicion;
+            } elseif ($condicionUsuario) {
+                $condiciones[] = $condicionUsuario;
             }
         }
 
@@ -493,6 +499,48 @@ private function consultaDirectivos(): string
               ) NOT LIKE '%PRUEBA%'
     ";
 }
+/**
+ * Codigos Tasy confirmados por segmento.
+ * Los segmentos sin equivalencias verificadas mantienen la busqueda por especialidad.
+ * Agregar codigos aqui solo despues de contrastarlos con el catalogo de Tasy.
+ */
+private const CLASIFICACION_TASY = [
+    'FARMACIA' => [
+        'profesiones' => ['F'],
+        'sectores' => [9],
+    ],
+];
+
+private function condicionUsuarioPorSegmento(string $codigo): ?string
+{
+    $config = self::CLASIFICACION_TASY[strtoupper($codigo)] ?? [];
+    $condiciones = [];
+
+    if (!empty($config['profesiones'])) {
+        $valores = array_map(
+            fn ($valor) => "'" . str_replace("'", "''", $valor) . "'",
+            $config['profesiones']
+        );
+        $condiciones[] = 'u.ie_profissional IN (' . implode(', ', $valores) . ')';
+    }
+
+    if (!empty($config['sectores'])) {
+        $sectores = array_map('intval', $config['sectores']);
+        $condiciones[] = 'u.cd_setor_atendimento IN (' . implode(', ', $sectores) . ')';
+    }
+
+    if (empty($condiciones)) {
+        return null;
+    }
+
+    return "EXISTS (
+        SELECT 1 FROM usuario u
+        WHERE u.cd_pessoa_fisica = p.cd_pessoa_fisica
+          AND u.ie_situacao = 'A'
+          AND (" . implode(' OR ', $condiciones) . ")
+    )";
+}
+
 private function condicionPorSegmento(string $codigo): ?string
 {
     return match (strtoupper($codigo)) {
