@@ -88,6 +88,7 @@ private function sincronizarCampaniasConMensajeria(MensajeriaService $mensajeria
 
     foreach ($campanias as $campania) {
         try {
+
             $response = $mensajeriaService->obtenerCampania($campania->id);
 
             if (!$response->successful()) {
@@ -370,41 +371,24 @@ public function dashboard(
         echo "</table>";
     }, 200, $headers);
 }
-    /*  public function dashboard(
+/* public function dashboard(
     Campania $campania,
     MensajeriaService $mensajeriaService
 ) {
-    if ($campania->estado !== 'finalizada') {
-        return redirect()
-            ->route('campanias.index')
-            ->withErrors([
-                'general' => 'Solo se puede ver el dashboard de campañas finalizadas.'
-            ]);
-    }
+    $campaniaMensajeriaId = $campania->mensajeria_campaign_id ?? $campania->id;
 
-    if (!$campania->mensajeria_campaign_id) {
-        return redirect()
-            ->route('campanias.index')
-            ->withErrors([
-                'general' => 'La campaña no tiene ID asociado en Mensajería.'
-            ]);
-    }
-
-    $response = $mensajeriaService->obtenerEstadisticas(
-        $campania->mensajeria_campaign_id
+    $estadisticas = $mensajeriaService->obtenerEstadisticas(
+       $campaniaMensajeriaId
     );
 
-    if (!$response->successful()) {
-        return redirect()
-            ->route('campanias.index')
-            ->withErrors([
-                'general' => 'No se pudieron obtener las estadísticas de Mensajería.'
-            ]);
-    }
+    $detallePacientes = $mensajeriaService->obtenerDetalleMensajes(
+       $campaniaMensajeriaId
+    );
 
-    $estadisticas = $response->json();
-
-    return view('campanias.dashboard', compact('campania', 'estadisticas'));
+    return view(
+        'campanias.dashboard',
+        compact('campania', 'estadisticas', 'detallePacientes')
+    );
 }*/
 protected function resolverSegmentacion(Request $request,MensajeriaService $mensajeriaService): array
 {

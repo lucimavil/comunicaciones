@@ -1,0 +1,61 @@
+services:
+  app:
+    build: .
+    container_name: app_comunicaciones
+    volumes:
+      - .:/var/www/html
+      - ./docker/php/custom.ini:/usr/local/etc/php/conf.d/99-custom.ini
+    environment:
+      APP_ENV: local
+      APP_DEBUG: true
+    extra_hosts:
+      - "hrc-mensajeria.sanluis.gob.ar:10.16.107.36"
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_comunicaciones
+    ports:
+      - "8071:9443"
+      - "9444:9443"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/certs:/etc/nginx/certs   # monta certificados aquí
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: comunicaciones_mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: sistema_comunicaciones
+      MYSQL_USER: sistema_user
+      MYSQL_PASSWORD: "*.suPA*."
+      MYSQL_ROOT_PASSWORD: "*.suPAAdm1n"
+    ports:
+      - "3311:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_comunicaciones
+    restart: always
+    ports:
+      - "8090:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+
+volumes:
+  dbdata:

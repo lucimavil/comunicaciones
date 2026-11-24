@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Comunicaciones')</title>
-
+    <link rel="icon" type="image/png" href="{{ asset('img/favicon.png') }}">
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -454,13 +454,11 @@
         <header class="topbar">
             <div>
                 <p class="topbar-subtitle mb-1">Panel general</p>
-                <h2 class="topbar-title">Campañas Segmentadas por WhatsApp</h2>
+                <h2 class="topbar-title">Sistema de Comunicaciones por WhatsApp</h2>
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-light border rounded-3 px-3">
-                    <i class="bi bi-bell me-2"></i>Alertas
-                </button>
+              
                <div class="user-chip">
                 <div class="user-avatar">
                     {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}

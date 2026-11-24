@@ -22,9 +22,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="section-title mb-0">Tablero de control</h3>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary rounded-3">
-                        <i class="bi bi-funnel me-2"></i>Filtrar
-                    </button>
+                  
                     <a  href="{{ route('campanias.create') }}">
                     <button class="btn btn-primary rounded-3 px-3">
                         <i class="bi bi-plus-lg me-2"></i>Nueva campaña
